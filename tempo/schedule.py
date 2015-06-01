@@ -136,3 +136,17 @@ class Schedule(object):
                                 yield dt.datetime(year=year, month=month,
                                                   day=day, hour=hour,
                                                   minute=minute, second=second)
+
+    def to_dict(self):
+        return {
+            'years': self._years,
+            'months': self._months,
+            'days': self._days,
+            'hours': self._hours,
+            'minutes': self._minutes,
+            'seconds': self._seconds
+        }
+
+    @classmethod
+    def from_dict(cls, value):
+        return cls(**value)
