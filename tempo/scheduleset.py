@@ -8,8 +8,8 @@ from tempo.utils import default
 
 class ScheduleSet(object):
     def __init__(self, include, exclude=None):
-        self.include = set(include)
-        self.exclude = default(exclude, {})
+        self.include = include = set(include)
+        self.exclude = exclude = default(exclude, set())
         maxs = [s.max for s in include
                 if all(s.max not in e for e in exclude)]
         if maxs:
