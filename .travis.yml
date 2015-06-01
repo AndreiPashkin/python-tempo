@@ -1,0 +1,12 @@
+sudo: required
+language: python
+before_install:
+  - pip install tox==1.9.2
+env:
+  - TOX_ENV=py27
+  - TOX_ENV=py3
+  - TOX_ENV=py32
+  - TOX_ENV=py33
+  - TOX_ENV=py34
+script:
+  - tox -e $TOX_ENV -v

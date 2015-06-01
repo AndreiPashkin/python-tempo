@@ -1,0 +1,1 @@
+http://github.com/AndrewPashkin/funclib/tarball/bc766ceed39a#egg=funclib-dev
