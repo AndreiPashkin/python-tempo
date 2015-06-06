@@ -24,7 +24,7 @@ class Schedule(object):
     ATTRS    = ('_seconds', '_minutes', '_hours', '_days', '_weekdays',
                 '_months', '_years')
 
-    __slots__ = ('max', 'min') + ATTRS
+    __slots__ = ATTRS
 
     def __init__(self, seconds=None, minutes=None, hours=None, days=None,
                  weekdays=None, months=None, years=None):
@@ -40,32 +40,6 @@ class Schedule(object):
                 setattr(self, attr, sorted(value))
             else:
                 setattr(self, attr, None)
-
-        calendar_ = calendar.Calendar()
-        min_year = min(default(self._years, self.YEARS))
-        min_month = min(default(self._months, self.MONTHS))
-        valid_min_days = calendar_.itermonthdays(min_year, min_month)
-        max_year = max(default(self._years, self.YEARS))
-        max_month = max(default(self._months, self.MONTHS))
-        valid_max_days = calendar_.itermonthdays(max_year, max_month)
-
-        self.min = dt.datetime(
-            min_year,
-            min_month,
-            min(set(default(self._days, self.DAYS)) & set(valid_min_days)),
-            min(default(self._hours, self.HOURS)),
-            min(default(self._minutes, self.MINUTES)),
-            min(default(self._seconds, self.SECONDS))
-        )
-
-        self.max = dt.datetime(
-            max_year,
-            max_month,
-            max(set(default(self._days, self.DAYS)) & set(valid_max_days)),
-            max(default(self._hours, self.HOURS)),
-            max(default(self._minutes, self.MINUTES)),
-            max(default(self._seconds, self.SECONDS))
-        )
 
     def _iteryears(self):
         return iter(default(self._years, self.YEARS))

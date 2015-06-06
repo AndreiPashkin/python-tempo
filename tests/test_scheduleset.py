@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+import datetime as dt
 import random as rnd
 from itertools import islice
 
@@ -25,7 +26,7 @@ def test_forward_random():
             [Schedule(**schedule_kwargs())
              for _ in range(rnd.randrange(1, 5))],
         )
-        actual = islice(schedule_set.forward(schedule_set.min), 10)
+        actual = islice(schedule_set.forward(dt.datetime.min), 10)
 
         prev = None
         for datetime in actual:

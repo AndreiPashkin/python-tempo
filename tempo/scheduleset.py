@@ -11,18 +11,6 @@ class ScheduleSet(object):
     def __init__(self, include, exclude=None):
         self.include = include = set(include)
         self.exclude = exclude = default(exclude, set())
-        maxs = [s.max for s in include
-                if all(s.max not in e for e in exclude)]
-        if maxs:
-            self.max = max(maxs)
-        else:
-            self.max = None
-        mins = [s.min for s in include
-                if all(s.min not in e for e in exclude)]
-        if mins:
-            self.min = min(mins)
-        else:
-            self.min = None
 
     def __contains__(self, item):
         for exclude in self.exclude:
