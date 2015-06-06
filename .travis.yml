@@ -10,7 +10,7 @@ before_script:
              LC_COLLATE = 'en_US.UTF-8'
              LC_CTYPE = 'en_US.UTF-8'
              TEMPLATE template0;" -U postgres
-before_install:
+install:
   - pip install tox==1.9.2
 env:
   - TOX_ENV=py27
