@@ -1,5 +1,5 @@
 # coding=utf-8
-from six.moves import filter
+from six.moves import filter, range
 import calendar
 import datetime as dt
 
@@ -14,13 +14,13 @@ class Schedule(object):
 
     Datetime objects can be tests for containment in schedule objects.
     """
-    SECONDS  = range(0, 60)
-    MINUTES  = range(0, 60)
-    HOURS    = range(0, 24)
-    DAYS     = range(1, 31 + 1)
-    WEEKDAYS = range(1, 7 + 1)
-    MONTHS   = range(1, 12 + 1)
-    YEARS    = range(dt.MINYEAR, dt.MAXYEAR + 1)
+    SECONDS  = list(range(0, 60))
+    MINUTES  = list(range(0, 60))
+    HOURS    = list(range(0, 24))
+    DAYS     = list(range(1, 31 + 1))
+    WEEKDAYS = list(range(1, 7 + 1))
+    MONTHS   = list(range(1, 12 + 1))
+    YEARS    = list(range(dt.MINYEAR, dt.MAXYEAR + 1))
     ATTRS    = ('_seconds_value', '_minutes_value', '_hours_value',
                 '_days_value', '_weekdays_value', '_months_value',
                 '_years_value')
