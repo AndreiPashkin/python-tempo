@@ -125,7 +125,7 @@ def test_forward_random():
         delta = datetime - dt.datetime.min
 
         datetime = datetime - relativedelta(
-            seconds=rnd.randrange(delta.total_seconds())
+            seconds=rnd.randint(0, delta.total_seconds())
         )
         actual = list(islice(Schedule(**kwargs).forward(datetime), 10))
         expected = list(islice(forward(datetime, **kwargs), 10))
