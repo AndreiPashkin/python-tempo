@@ -9,7 +9,7 @@ def schedule_kwargs():
     return {
         'years': sorted(
             rnd.sample(Schedule.YEARS,
-                       rnd.randrange(1, len(Schedule.YEARS)))
+                       rnd.randrange(1, len(Schedule.YEARS)))[:20]
         ),
         'months': sorted(
             rnd.sample(Schedule.MONTHS,
