@@ -69,6 +69,8 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     calendar_cofigurations_traversed = set()
     yields = 0
 
+    max_year = max(years)
+
     while True:
         initial_year = datetime.year
         for getter, data in checks:
@@ -97,7 +99,10 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
         if datetime.hour not in hours:
             datetime += relativedelta(hours=1, minute=0, second=0)
 
-        if datetime.year > max(years):
+        if datetime.minute not in minutes:
+            datetime += relativedelta(minutes=1, second=0)
+
+        if datetime.year > max_year:
             break
 
         if initial_year != datetime.year:
