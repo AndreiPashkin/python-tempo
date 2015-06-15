@@ -21,8 +21,9 @@ class Schedule(object):
     WEEKDAYS = range(1, 7 + 1)
     MONTHS   = range(1, 12 + 1)
     YEARS    = range(dt.MINYEAR, dt.MAXYEAR + 1)
-    ATTRS    = ('_seconds', '_minutes', '_hours', '_days', '_weekdays',
-                '_months', '_years')
+    ATTRS    = ('_seconds_value', '_minutes_value', '_hours_value',
+                '_days_value', '_weekdays_value', '_months_value',
+                '_years_value')
 
     __slots__ = ATTRS
 
@@ -43,35 +44,63 @@ class Schedule(object):
             else:
                 setattr(self, attr, None)
 
+    @property
+    def _years(self):
+        return default(self._years_value, self.YEARS)
+
+    @property
+    def _months(self):
+        return default(self._months_value, self.MONTHS)
+
+    @property
+    def _days(self):
+        return default(self._days_value, self.DAYS)
+
+    @property
+    def _weekdays(self):
+        return default(self._weekdays_value, self.WEEKDAYS)
+
+    @property
+    def _hours(self):
+        return default(self._hours_value, self.HOURS)
+
+    @property
+    def _minutes(self):
+        return default(self._minutes_value, self.MINUTES)
+
+    @property
+    def _seconds(self):
+        return default(self._seconds_value, self.SECONDS)
+
     def _iteryears(self):
-        return iter(default(self._years, self.YEARS))
+        return iter(self._years)
 
     def _itermonths(self):
-        return iter(default(self._months, self.MONTHS))
+        return iter(self._months)
 
     def _iterdays(self, year, month):
         for day, weekday in calendar.Calendar().itermonthdays2(year, month):
-            if (day in default(self._days, self.DAYS) and
-                weekday in default(self._weekdays, self.WEEKDAYS)):
+            if (day in self._days and
+                weekday in self._weekdays):
                 yield day
 
     def _iterhours(self):
-        return iter(default(self._hours, self.HOURS))
+        return iter(self._hours)
 
     def _iterminutes(self):
-        return iter(default(self._minutes, self.MINUTES))
+        return iter(self._minutes)
 
     def _iterseconds(self):
-        return iter(default(self._seconds, self.SECONDS))
+        return iter(self._seconds)
 
     def __contains__(self, item):
         return (
-            item.year in default(self._years, self.YEARS) and
-            item.month in default(self._months, self.MONTHS) and
-            item.day in default(self._days, self.DAYS) and
-            item.hour in default(self._hours, self.HOURS) and
-            item.minute in default(self._minutes, self.MINUTES) and
-            item.second in default(self._seconds, self.SECONDS)
+            item.year in self._years and
+            item.month in self._months and
+            item.day in self._days and
+            item.hour in self._hours and
+            item.minute in self._minutes and
+            item.second in self._seconds
         )
 
     def forward(self, datetime=None):
