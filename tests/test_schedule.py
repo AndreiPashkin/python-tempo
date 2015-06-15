@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+import calendar
 import operator as op
 import random as rnd
 import datetime as dt
@@ -65,7 +66,7 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     except IndexError:
         raise StopIteration
 
-    years_traversed = 0
+    calendar_cofigurations_traversed = set()
     yields = 0
 
     while True:
@@ -100,9 +101,12 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
             break
 
         if initial_year != datetime.year:
-            years_traversed += 1
-            if years_traversed >= 6 and yields == 0:
-                # Traversed 4 full years with no results - breaking.
+            calendar_cofigurations_traversed.add(
+                (dt.datetime(initial_year, 1, 1).weekday(),
+                 calendar.isleap(initial_year))
+            )
+            if len(calendar_cofigurations_traversed) == 14 and yields == 0:
+                # Traversed all possible calendars with no results - breaking.
                 raise StopIteration
 
 
