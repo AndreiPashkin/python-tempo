@@ -28,13 +28,15 @@ class Schedule(object):
 
     def __init__(self, seconds=None, minutes=None, hours=None, days=None,
                  weekdays=None, months=None, years=None):
-        for value, attr, possible in [(seconds, '_seconds', self.SECONDS),
-                                      (minutes, '_minutes', self.MINUTES),
-                                      (hours, '_hours', self.HOURS),
-                                      (days, '_days', self.DAYS),
-                                      (weekdays, '_weekdays', self.WEEKDAYS),
-                                      (months, '_months', self.MONTHS),
-                                      (years, '_years', self.YEARS)]:
+        for value, attr, possible in [
+            (seconds,  '_seconds_value',  self.SECONDS),
+            (minutes,  '_minutes_value',  self.MINUTES),
+            (hours,    '_hours_value',    self.HOURS),
+            (days,     '_days_value',     self.DAYS),
+            (weekdays, '_weekdays_value', self.WEEKDAYS),
+            (months,   '_months_value',   self.MONTHS),
+            (years,    '_years_value',    self.YEARS)
+        ]:
             if value is not None and len(value) > 0:
                 assert set(value) <= set(possible)
                 setattr(self, attr, sorted(value))
