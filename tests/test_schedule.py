@@ -105,7 +105,7 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
         if datetime.year > max_year:
             break
 
-        if initial_year != datetime.year:
+        if initial_year != datetime.year and initial_year in years:
             calendar_cofigurations_traversed.add(
                 (dt.datetime(initial_year, 1, 1).weekday(),
                  calendar.isleap(initial_year))
