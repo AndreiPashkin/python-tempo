@@ -80,6 +80,8 @@ class Schedule(object):
 
     def _iterdays(self, year, month):
         for day, weekday in calendar.Calendar().itermonthdays2(year, month):
+            if day == 0:
+                continue
             if (day in self._days and
                 weekday in self._weekdays):
                 yield day
