@@ -1,4 +1,5 @@
 # coding=utf-8
+from collections import deque
 from six.moves import filter, range
 import calendar
 import datetime as dt
@@ -105,44 +106,112 @@ class Schedule(object):
             item.second in self._seconds
         )
 
+    @staticmethod
+    def _iterate(places, stack, context):
+        """Helper, that performs one step in calculation of next value
+        in kind of a numerical system, that represents
+        date/time. 'places' is a list of tuples `(fn(context), 'key')`.
+        Each tuple represents a part of the date/time numeral system.
+        Function must construct iterator over values for given context.
+        And key is a key in the context which will be used to store values
+        from iterator in the context.
+        Context holds current values for other places. It's needed because
+        one places can only be calulcated with knowledge of values of
+        other places. Such as day of month - since number of days vary from
+        month to month, we must know the month before calculate next day.
+        """
+
+        # TODO Maybe this should be broken down into small functions.
+        try:
+            iterator, key = stack[-1]
+        except IndexError:
+            pass
+        else:
+            try:
+                result = next(iterator)
+            except StopIteration:
+                context.pop(key, None)
+                stack.pop()
+                return
+
+            context[key] = result
+
+        if len(stack) < len(places):
+            fn, key = places[len(stack)]
+            stack.append((fn(context), key))
+
     def forward(self, datetime=None):
+        context = {}
+        places = [
+            (lambda ctx: self._iteryears(), 'year'),
+            (lambda ctx: self._itermonths(), 'month'),
+            (lambda ctx: self._iterdays(ctx['year'], ctx['month']), 'day'),
+            (lambda ctx: self._iterhours(), 'hour'),
+            (lambda ctx: self._iterminutes(), 'minute'),
+            (lambda ctx: self._iterseconds(), 'second'),
+        ]
+
         datetime = default(datetime, dt.datetime.now())
+        start_places = [
+            (lambda ctx: (y for y in self._iteryears() if y >= datetime.year),
+             'year'),
+            (lambda ctx: (m for m in self._itermonths() if m >= datetime.month)
+                         if ctx['year'] == datetime.year
+                         else self._itermonths(),
+             'month'),
+            (lambda ctx: (d for d in self._iterdays(ctx['year'], ctx['month'])
+                          if d >= datetime.day)
+                         if ctx['year'] == datetime.year and
+                            ctx['month'] == datetime.month
+                         else self._iterdays(ctx['year'], ctx['month']),
+             'day'),
+            (lambda ctx: (h for h in self._iterhours() if h >= datetime.hour)
+                         if ctx['year'] == datetime.year and
+                            ctx['month'] == datetime.month and
+                            ctx['day'] == datetime.day
+                         else self._iterhours(),
+             'hour'),
+            (lambda ctx: (m for m in self._iterminutes()
+                          if m >= datetime.minute)
+                         if ctx['year'] == datetime.year and
+                            ctx['month'] == datetime.month and
+                            ctx['day'] == datetime.day and
+                            ctx['hour'] == datetime.hour
+                         else self._iterminutes(),
+             'minute'),
+            (lambda ctx: (s for s in self._iterseconds()
+                          if s >= datetime.second)
+                         if ctx['year'] == datetime.year and
+                            ctx['month'] == datetime.month and
+                            ctx['day'] == datetime.day and
+                            ctx['hour'] == datetime.hour and
+                            ctx['minute'] == datetime.minute
+                         else self._iterseconds(),
+             'second'),
+        ]
 
-        for year in filter(lambda y: y >= datetime.year, self._iteryears()):
-            for month in (filter(lambda m: m >= datetime.month,
-                                 self._itermonths())
-                          if year == datetime.year else self._itermonths()):
-                for day in (filter(lambda d: d >= datetime.day,
-                                   self._iterdays(year, month))
-                            if year == datetime.year and
-                               month == datetime.month
-                            else self._iterdays(year, month)):
-                    for hour in (filter(lambda h: h >= datetime.hour,
-                                        self._iterhours())
-                                 if year == datetime.year and
-                                    month == datetime.month and
-                                    day == datetime.day
-                                 else self._iterhours()):
-                        for minute in (filter(lambda m: m >= datetime.minute,
-                                              self._iterminutes())
-                                       if year == datetime.year and
-                                          month == datetime.month and
-                                          day == datetime.day and
-                                          hour == datetime.hour
-                                       else self._iterminutes()):
-                            for second in (filter(lambda s: s >=
-                                                  datetime.second,
-                                           self._iterseconds())
-                                           if year == datetime.year and
-                                              month == datetime.month and
-                                              day == datetime.day and
-                                              hour == datetime.hour and
-                                              minute == datetime.minute
-                                           else self._iterseconds()):
+        stack = deque()
 
-                                yield dt.datetime(year=year, month=month,
-                                                  day=day, hour=hour,
-                                                  minute=minute, second=second)
+        while len(stack) < len(start_places):
+            self._iterate(start_places, stack, context)
+
+        assert len(stack) == len(start_places) == len(places)
+
+        exhausts = 0
+
+        while True:
+            self._iterate(places, stack, context)
+            if len(stack) == 0:
+                exhausts += 1
+                if exhausts > 0:
+                    break
+
+            try:
+                yield dt.datetime(context['year'], context['month'],
+                                  context['day'], context['hour'],
+                                  context['minute'], context['second'])
+            except KeyError:
+                pass
 
     def to_dict(self):
         return {
