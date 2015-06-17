@@ -48,13 +48,12 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     years_sorted = sorted(years)
 
     checks = [
-        (op.attrgetter('second'), seconds),
-        (op.attrgetter('minute'), minutes),
-        (op.attrgetter('hour'),   hours),
-        (op.attrgetter('day'),    days),
-        (lambda d: d.weekday(),   weekdays),
-        (op.attrgetter('month'),  months),
-        (op.attrgetter('year'),   years)
+        [(op.attrgetter('second'), seconds)],
+        [(op.attrgetter('minute'), minutes)],
+        [(op.attrgetter('hour'), hours)],
+        [(op.attrgetter('day'), days), (lambda d: d.weekday(), weekdays)],
+        [(op.attrgetter('month'), months)],
+        [(op.attrgetter('year'), years)]
     ]
 
     def find_closest_year(datetime):
@@ -75,8 +74,9 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
 
     while True:
         initial_year = datetime.year
-        for getter, data in checks:
-            if getter(datetime) not in data:
+        for check_list in checks:
+            if not any(getter(datetime) in data
+                       for getter, data in check_list):
                 break
         else:
             yield datetime
@@ -97,7 +97,7 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
             datetime += relativedelta(months=1, day=1, hour=0,
                                       minute=0, second=0)
 
-        if datetime.day not in days:
+        if datetime.day not in days and datetime.weekday() not in weekdays:
             datetime += relativedelta(days=1, hour=0, minute=0, second=0)
 
         if datetime.hour not in hours:

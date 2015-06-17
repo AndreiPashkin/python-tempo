@@ -82,7 +82,7 @@ class Schedule(object):
         for day, weekday in calendar.Calendar().itermonthdays2(year, month):
             if day == 0:
                 continue
-            if (day in self._days and
+            if (day in self._days or
                 weekday in self._weekdays):
                 yield day
 
@@ -99,7 +99,7 @@ class Schedule(object):
         return (
             item.year in self._years and
             item.month in self._months and
-            item.day in self._days and
+            (item.day in self._days or item.weekday() in self._weekdays) and
             item.hour in self._hours and
             item.minute in self._minutes and
             item.second in self._seconds
