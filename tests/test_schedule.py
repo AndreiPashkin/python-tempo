@@ -45,6 +45,8 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     months = set(months or Schedule.MONTHS)
     years = set(years or Schedule.YEARS)
 
+    years_sorted = sorted(years)
+
     checks = [
         (op.attrgetter('second'), seconds),
         (op.attrgetter('minute'), minutes),
@@ -57,7 +59,7 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
 
     def find_closest_year(datetime):
         return datetime.replace(
-            year=first((y for y in sorted(years) if y >= datetime.year)),
+            year=first((y for y in years_sorted if y >= datetime.year)),
             month=min(months), day=1, hour=0, minute=0, second=0
         ).replace(microsecond=0)
 
@@ -86,8 +88,10 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
             break
 
         if datetime.year not in years:
-            datetime += relativedelta(years=1, month=1, day=1, hour=0,
-                                      minute=0, second=0)
+            try:
+                datetime = find_closest_year(datetime)
+            except IndexError:
+                raise StopIteration
 
         if datetime.month not in months:
             datetime += relativedelta(months=1, day=1, hour=0,
