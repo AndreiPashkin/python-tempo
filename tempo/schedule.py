@@ -140,7 +140,7 @@ class Schedule(object):
             fn, key = places[len(stack)]
             stack.append((fn(context), key))
 
-    def forward(self, datetime=None):
+    def forward(self, start=None):
         context = {}
         places = [
             (lambda ctx: self._iteryears(), 'year'),
@@ -151,41 +151,41 @@ class Schedule(object):
             (lambda ctx: self._iterseconds(), 'second'),
         ]
 
-        datetime = default(datetime, dt.datetime.now())
+        start = default(start, dt.datetime.now())
         start_places = [
-            (lambda ctx: (y for y in self._iteryears() if y >= datetime.year),
+            (lambda ctx: (y for y in self._iteryears() if y >= start.year),
              'year'),
-            (lambda ctx: (m for m in self._itermonths() if m >= datetime.month)
-                         if ctx['year'] == datetime.year
+            (lambda ctx: (m for m in self._itermonths() if m >= start.month)
+                         if ctx['year'] == start.year
                          else self._itermonths(),
              'month'),
             (lambda ctx: (d for d in self._iterdays(ctx['year'], ctx['month'])
-                          if d >= datetime.day)
-                         if ctx['year'] == datetime.year and
-                            ctx['month'] == datetime.month
+                          if d >= start.day)
+                         if ctx['year'] == start.year and
+                            ctx['month'] == start.month
                          else self._iterdays(ctx['year'], ctx['month']),
              'day'),
-            (lambda ctx: (h for h in self._iterhours() if h >= datetime.hour)
-                         if ctx['year'] == datetime.year and
-                            ctx['month'] == datetime.month and
-                            ctx['day'] == datetime.day
+            (lambda ctx: (h for h in self._iterhours() if h >= start.hour)
+                         if ctx['year'] == start.year and
+                            ctx['month'] == start.month and
+                            ctx['day'] == start.day
                          else self._iterhours(),
              'hour'),
             (lambda ctx: (m for m in self._iterminutes()
-                          if m >= datetime.minute)
-                         if ctx['year'] == datetime.year and
-                            ctx['month'] == datetime.month and
-                            ctx['day'] == datetime.day and
-                            ctx['hour'] == datetime.hour
+                          if m >= start.minute)
+                         if ctx['year'] == start.year and
+                            ctx['month'] == start.month and
+                            ctx['day'] == start.day and
+                            ctx['hour'] == start.hour
                          else self._iterminutes(),
              'minute'),
             (lambda ctx: (s for s in self._iterseconds()
-                          if s >= datetime.second)
-                         if ctx['year'] == datetime.year and
-                            ctx['month'] == datetime.month and
-                            ctx['day'] == datetime.day and
-                            ctx['hour'] == datetime.hour and
-                            ctx['minute'] == datetime.minute
+                          if s >= start.second)
+                         if ctx['year'] == start.year and
+                            ctx['month'] == start.month and
+                            ctx['day'] == start.day and
+                            ctx['hour'] == start.hour and
+                            ctx['minute'] == start.minute
                          else self._iterseconds(),
              'second'),
         ]
