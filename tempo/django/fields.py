@@ -39,7 +39,9 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
         )
 
     def to_python(self, value):
-        if isinstance(value, ScheduleSet):
+        if value is None:
+            return value
+        elif isinstance(value, ScheduleSet):
             return value
         if isinstance(value, dict):
             deserialized = value

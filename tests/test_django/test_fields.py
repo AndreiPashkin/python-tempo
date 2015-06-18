@@ -4,7 +4,7 @@ import datetime as dt
 
 import pytest
 from tempo.django.fields import ScheduleSetField
-from tests.test_django.aproject.anapp.models import AModel
+from tests.test_django.aproject.anapp.models import AModel, NullableModel
 from tempo.schedule import Schedule
 from tempo.scheduleset import ScheduleSet
 
@@ -29,3 +29,13 @@ def test_contains():
     expected = ScheduleSetField.schedulset_to_dict(scheduleset)
 
     assert actual == expected
+
+
+@pytest.mark.django_db
+def test_null():
+    """null=true option for the field works as expected."""
+    NullableModel.objects.create()
+
+    actual = NullableModel.objects.get()
+
+    assert actual.schedule is None
