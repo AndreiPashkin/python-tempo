@@ -16,7 +16,8 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
     @classmethod
     def schedule_to_dict(cls, schedule):
         return {attr: getattr(schedule, attr) for attr in
-                ('years', 'months', 'days', 'hours', 'minutes', 'seconds')}
+                ('years', 'months', 'days', 'weekdays', 'hours', 'minutes',
+                 'seconds')}
 
     @classmethod
     def schedule_from_dict(cls, dictionary):
@@ -75,8 +76,10 @@ class Contains(models.Lookup):
             "          value->'years' = 'null'::jsonb) AND "
             "         (value->'months' @> '%(month)s'::jsonb OR "
             "          value->'months' = 'null'::jsonb) AND "
-            "         (value->'days' @> '%(day)s'::jsonb OR "
-            "          value->'days' = 'null'::jsonb) AND "
+            "         ((value->'days' @> '%(day)s'::jsonb OR "
+            "           value->'days' = 'null'::jsonb) OR "
+            "          (value->'weekdays' @> '%(weekday)s'::jsonb OR "
+            "           value->'weekdays' = 'null'::jsonb)) AND "
             "         (value->'hours' @> '%(hour)s'::jsonb OR "
             "          value->'hours' = 'null'::jsonb) AND "
             "         (value->'minutes' @> '%(minute)s'::jsonb OR "
@@ -90,8 +93,10 @@ class Contains(models.Lookup):
             "          value->'years' = 'null'::jsonb) AND "
             "         (value->'months' @> '%(month)s'::jsonb OR "
             "          value->'months' = 'null'::jsonb) AND "
-            "         (value->'days' @> '%(day)s'::jsonb OR "
-            "          value->'days' = 'null'::jsonb) AND "
+            "         ((value->'days' @> '%(day)s'::jsonb OR "
+            "           value->'days' = 'null'::jsonb) OR "
+            "          (value->'weekdays' @> '%(weekday)s'::jsonb OR "
+            "           value->'weekdays' = 'null'::jsonb)) AND "
             "         (value->'hours' @> '%(hour)s'::jsonb OR "
             "          value->'hours' = 'null'::jsonb) AND "
             "         (value->'minutes' @> '%(minute)s'::jsonb OR "
@@ -103,6 +108,7 @@ class Contains(models.Lookup):
         params = {'year': self.rhs.year,
                   'month': self.rhs.month,
                   'day': self.rhs.day,
+                  'weekday': self.rhs.weekday(),
                   'hour': self.rhs.hour,
                   'minute': self.rhs.minute,
                   'second': self.rhs.second,

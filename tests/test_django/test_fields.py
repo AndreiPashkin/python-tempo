@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 import datetime as dt
+from funclib.sequences import pluckattr
 
 import pytest
 from tempo.django.fields import ScheduleSetField
@@ -9,24 +10,26 @@ from tempo.schedule import Schedule
 from tempo.scheduleset import ScheduleSet
 
 
+@pytest.mark.parametrize('schedulesets, datetime', [
+    ([ScheduleSet(include=[Schedule(years=[2014])]),
+      ScheduleSet(include=[Schedule(years=[2015])])],
+     dt.datetime(2014, 1, 1)),
+
+    ([ScheduleSet(include=[Schedule(weekdays=[2], days=[15])]),
+      ScheduleSet(include=[Schedule(weekdays=[4], days=[1])])],
+     dt.datetime(2014, 1, 1))
+])
 @pytest.mark.django_db
-def test_contains():
+def test_contains(schedulesets, datetime):
     """'contains' lookup."""
-    scheduleset = ScheduleSet(
-        include=[Schedule(years=[2014])]
-    )
-    AModel.objects.create(schedule=scheduleset)
-    AModel.objects.create(schedule=ScheduleSet(
-        include=[Schedule(years=[2015])]
-    ))
-    assert (AModel.objects.filter(schedule__contains=dt.datetime(2014, 1, 1))
-                          .count() ==
-            1)
+    expected = sorted(ScheduleSetField.schedulset_to_dict(s)
+                      for s in schedulesets if datetime in s)
+    AModel.objects.bulk_create([AModel(schedule=s) for s in schedulesets])
 
-    obj = AModel.objects.get(schedule__contains=dt.datetime(2014, 1, 1))
+    objs = AModel.objects.filter(schedule__contains=datetime)
 
-    actual = ScheduleSetField.schedulset_to_dict(obj.schedule)
-    expected = ScheduleSetField.schedulset_to_dict(scheduleset)
+    actual = sorted(map(ScheduleSetField.schedulset_to_dict,
+                        pluckattr('schedule', objs)))
 
     assert actual == expected
 
