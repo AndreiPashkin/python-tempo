@@ -23,9 +23,8 @@ class Schedule(object):
     WEEKDAYS           = list(range(1, 7 + 1))
     MONTHS             = list(range(1, 12 + 1))
     YEARS              = list(range(dt.MINYEAR, dt.MAXYEAR + 1))
-    ATTRS              = ('_seconds_of_the_day_value', '_seconds_value',
-                          '_minutes_value', '_hours_value', '_days_value',
-                          '_weekdays_value', '_months_value', '_years_value')
+    ATTRS              = ('seconds_of_the_day', 'seconds', 'minutes', 'hours',
+                          'days', 'weekdays', 'months', 'years')
 
     __slots__ = ATTRS
 
@@ -33,15 +32,15 @@ class Schedule(object):
                  hours=None, days=None, weekdays=None, months=None,
                  years=None):
         for value, attr, possible in [
-            (seconds_of_the_day, '_seconds_of_the_day_value',
+            (seconds_of_the_day, 'seconds_of_the_day',
              self.SECONDS_OF_THE_DAY),
-            (seconds, '_seconds_value', self.SECONDS),
-            (minutes, '_minutes_value', self.MINUTES),
-            (hours, '_hours_value', self.HOURS),
-            (days, '_days_value', self.DAYS),
-            (weekdays, '_weekdays_value', self.WEEKDAYS),
-            (months, '_months_value', self.MONTHS),
-            (years, '_years_value', self.YEARS)
+            (seconds, 'seconds', self.SECONDS),
+            (minutes, 'minutes', self.MINUTES),
+            (hours, 'hours', self.HOURS),
+            (days, 'days', self.DAYS),
+            (weekdays, 'weekdays', self.WEEKDAYS),
+            (months, 'months', self.MONTHS),
+            (years, 'years', self.YEARS)
         ]:
             if value is not None and len(value) > 0:
                 assert set(value) <= set(possible)
@@ -51,35 +50,35 @@ class Schedule(object):
 
     @property
     def _years(self):
-        return default(self._years_value, self.YEARS)
+        return default(self.years, self.YEARS)
 
     @property
     def _months(self):
-        return default(self._months_value, self.MONTHS)
+        return default(self.months, self.MONTHS)
 
     @property
     def _days(self):
-        return default(self._days_value, self.DAYS)
+        return default(self.days, self.DAYS)
 
     @property
     def _weekdays(self):
-        return default(self._weekdays_value, self.WEEKDAYS)
+        return default(self.weekdays, self.WEEKDAYS)
 
     @property
     def _hours(self):
-        return default(self._hours_value, self.HOURS)
+        return default(self.hours, self.HOURS)
 
     @property
     def _minutes(self):
-        return default(self._minutes_value, self.MINUTES)
+        return default(self.minutes, self.MINUTES)
 
     @property
     def _seconds(self):
-        return default(self._seconds_value, self.SECONDS)
+        return default(self.seconds, self.SECONDS)
 
     @property
     def _seconds_of_the_day(self):
-        return default(self._seconds_of_the_day_value, self.SECONDS_OF_THE_DAY)
+        return default(self.seconds_of_the_day, self.SECONDS_OF_THE_DAY)
 
     def _iteryears(self):
         return iter(self._years)
@@ -239,17 +238,3 @@ class Schedule(object):
                                   context['minute'], context['second'])
             except KeyError:
                 pass
-
-    def to_dict(self):
-        return {
-            'years': self._years,
-            'months': self._months,
-            'days': self._days,
-            'hours': self._hours,
-            'minutes': self._minutes,
-            'seconds': self._seconds
-        }
-
-    @classmethod
-    def from_dict(cls, value):
-        return cls(**value)

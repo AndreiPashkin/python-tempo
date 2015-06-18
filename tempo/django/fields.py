@@ -4,6 +4,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.six import with_metaclass
 from django.db import models
 import json
+from tempo.schedule import Schedule
 from tempo.scheduleset import ScheduleSet
 
 
@@ -12,6 +13,31 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
     def db_type(self, connection):
         return 'jsonb'
 
+    @classmethod
+    def schedule_to_dict(cls, schedule):
+        return {attr: getattr(schedule, attr) for attr in
+                ('years', 'months', 'days', 'hours', 'minutes', 'seconds')}
+
+    @classmethod
+    def schedule_from_dict(cls, dictionary):
+        return Schedule(**dictionary)
+
+    @classmethod
+    def schedulset_to_dict(cls, scheduleset):
+        return {
+            'include': map(cls.schedule_to_dict, scheduleset.include),
+            'exclude': map(cls.schedule_to_dict, scheduleset.exclude)
+        }
+
+    @classmethod
+    def scheduleset_from_dict(cls, dictionary):
+        return ScheduleSet(
+            include=map(cls.schedule_from_dict, dictionary['include']),
+            exclude=map(cls.schedule_from_dict, dictionary['exclude'])
+                    if 'exclude' in dictionary
+                    else None
+        )
+
     def to_python(self, value):
         if isinstance(value, ScheduleSet):
             return value
@@ -19,7 +45,7 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
             deserialized = value
         else:
             deserialized = json.loads(value)
-        return ScheduleSet.from_dict(deserialized)
+        return self.scheduleset_from_dict(deserialized)
 
     def get_prep_lookup(self, lookup_type, value):
         return value
@@ -28,7 +54,8 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
         value = super(ScheduleSetField, self).get_prep_value(value)
         if value is None:
             return None
-        return json.dumps(value.to_dict(), cls=DjangoJSONEncoder)
+        return json.dumps(self.schedulset_to_dict(value),
+                          cls=DjangoJSONEncoder)
 
 
 class Contains(models.Lookup):

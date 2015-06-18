@@ -54,31 +54,3 @@ class ScheduleSet(object):
                 prev = next_
             except IndexError:
                 raise StopIteration
-
-    def to_dict(self):
-        dict_ = {}
-
-        dict_['include'] = [i.to_dict() for i in self.include]
-
-        if len(self.include) > 0:
-            dict_['exclude'] = [e.to_dict() for e in self.exclude]
-
-        return dict_
-
-    @classmethod
-    def from_dict(cls, value):
-        try:
-            include = value['include']
-        except KeyError:
-            raise TypeError
-
-        assert len(include) > 0
-
-        exclude = value.get('exclude', [])
-        if (all(isinstance(i, dict) for i in include) and
-            (len(exclude) == 0 or
-             all(isinstance(e, dict) for e in exclude))):
-            include = map(Schedule.from_dict, include)
-            exclude = map(Schedule.from_dict, exclude)
-
-        return cls(include=include, exclude=exclude)
