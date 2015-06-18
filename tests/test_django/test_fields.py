@@ -17,7 +17,11 @@ from tempo.scheduleset import ScheduleSet
 
     ([ScheduleSet(include=[Schedule(weekdays=[2], days=[15])]),
       ScheduleSet(include=[Schedule(weekdays=[4], days=[1])])],
-     dt.datetime(2014, 1, 1))
+     dt.datetime(2014, 1, 1)),
+
+    ([ScheduleSet(include=[Schedule(seconds_of_the_day=[2], seconds=[15])]),
+      ScheduleSet(include=[Schedule(seconds_of_the_day=[15], seconds=[15])])],
+     dt.datetime(2014, 1, 1, 0, 0, 2))
 ])
 @pytest.mark.django_db
 def test_contains(schedulesets, datetime):

@@ -17,7 +17,7 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
     def schedule_to_dict(cls, schedule):
         return {attr: getattr(schedule, attr) for attr in
                 ('years', 'months', 'days', 'weekdays', 'hours', 'minutes',
-                 'seconds')}
+                 'seconds', 'seconds_of_the_day')}
 
     @classmethod
     def schedule_from_dict(cls, dictionary):
@@ -79,14 +79,17 @@ class Contains(models.Lookup):
         "  (value->'weekdays' @> '%(weekday)s'::jsonb OR "
         "   value->'weekdays' = 'null'::jsonb)) "
         " AND "
-        " (value->'hours' @> '%(hour)s'::jsonb OR "
-        "  value->'hours' = 'null'::jsonb) "
-        " AND "
-        " (value->'minutes' @> '%(minute)s'::jsonb OR "
-        "  value->'minutes' = 'null'::jsonb) "
-        " AND "
-        " (value->'seconds' @> '%(second)s'::jsonb OR "
-        "  value->'seconds' = 'null'::jsonb)"
+        " (((value->'hours' @> '%(hour)s'::jsonb OR "
+        "    value->'hours' = 'null'::jsonb) "
+        "   AND "
+        "  (value->'minutes' @> '%(minute)s'::jsonb OR "
+        "   value->'minutes' = 'null'::jsonb) "
+        "   AND "
+        "  (value->'seconds' @> '%(second)s'::jsonb OR "
+        "   value->'seconds' = 'null'::jsonb))"
+        "  OR "
+        "  (value->'seconds_of_the_day' @> '%(second_of_the_day)s'::jsonb OR "
+        "   value->'seconds_of_the_day' = 'null'::jsonb))"
     )
 
     LOOKUP = (
@@ -109,6 +112,9 @@ class Contains(models.Lookup):
                   'hour': self.rhs.hour,
                   'minute': self.rhs.minute,
                   'second': self.rhs.second,
+                  'second_of_the_day': (self.rhs.hour * 60 * 60 +
+                                        self.rhs.minute * 60 +
+                                        self.rhs.second),
                   'field': lhs % lhs_params}
         return self.LOOKUP % params, []
 
