@@ -66,45 +66,42 @@ class Contains(models.Lookup):
     ScheduleSet stored in DB."""
     lookup_name = 'contains'
 
+    CONTAINMENT_CONDITION = (
+        " (value->'years' @> '%(year)s'::jsonb OR "
+        "  value->'years' = 'null'::jsonb) "
+        " AND "
+        " (value->'months' @> '%(month)s'::jsonb OR "
+        "  value->'months' = 'null'::jsonb) "
+        " AND "
+        " ((value->'days' @> '%(day)s'::jsonb OR "
+        "   value->'days' = 'null'::jsonb) "
+        "  OR "
+        "  (value->'weekdays' @> '%(weekday)s'::jsonb OR "
+        "   value->'weekdays' = 'null'::jsonb)) "
+        " AND "
+        " (value->'hours' @> '%(hour)s'::jsonb OR "
+        "  value->'hours' = 'null'::jsonb) "
+        " AND "
+        " (value->'minutes' @> '%(minute)s'::jsonb OR "
+        "  value->'minutes' = 'null'::jsonb) "
+        " AND "
+        " (value->'seconds' @> '%(second)s'::jsonb OR "
+        "  value->'seconds' = 'null'::jsonb)"
+    )
+
+    LOOKUP = (
+        "EXISTS ("
+        "    SELECT value FROM jsonb_array_elements(%(field)s->'include')"
+        "    WHERE " + CONTAINMENT_CONDITION + ")"
+        " AND "
+        "NOT EXISTS ("
+        "   SELECT value FROM jsonb_array_elements(%(field)s->'exclude')"
+        "   WHERE " + CONTAINMENT_CONDITION + ")"
+    )
+
     def as_sql(self, compiler, connection):
         lhs, lhs_params = self.process_lhs(compiler, connection)
 
-        lookup = (
-            "EXISTS ("
-            "   SELECT value FROM jsonb_array_elements(%(field)s->'include')"
-            "   WHERE (value->'years' @> '%(year)s'::jsonb OR "
-            "          value->'years' = 'null'::jsonb) AND "
-            "         (value->'months' @> '%(month)s'::jsonb OR "
-            "          value->'months' = 'null'::jsonb) AND "
-            "         ((value->'days' @> '%(day)s'::jsonb OR "
-            "           value->'days' = 'null'::jsonb) OR "
-            "          (value->'weekdays' @> '%(weekday)s'::jsonb OR "
-            "           value->'weekdays' = 'null'::jsonb)) AND "
-            "         (value->'hours' @> '%(hour)s'::jsonb OR "
-            "          value->'hours' = 'null'::jsonb) AND "
-            "         (value->'minutes' @> '%(minute)s'::jsonb OR "
-            "          value->'minutes' = 'null'::jsonb) AND "
-            "         (value->'seconds' @> '%(second)s'::jsonb OR "
-            "          value->'seconds' = 'null'::jsonb)"
-            ") AND "
-            "NOT EXISTS ("
-            "   SELECT value FROM jsonb_array_elements(%(field)s->'exclude')"
-            "   WHERE (value->'years' @> '%(year)s'::jsonb OR "
-            "          value->'years' = 'null'::jsonb) AND "
-            "         (value->'months' @> '%(month)s'::jsonb OR "
-            "          value->'months' = 'null'::jsonb) AND "
-            "         ((value->'days' @> '%(day)s'::jsonb OR "
-            "           value->'days' = 'null'::jsonb) OR "
-            "          (value->'weekdays' @> '%(weekday)s'::jsonb OR "
-            "           value->'weekdays' = 'null'::jsonb)) AND "
-            "         (value->'hours' @> '%(hour)s'::jsonb OR "
-            "          value->'hours' = 'null'::jsonb) AND "
-            "         (value->'minutes' @> '%(minute)s'::jsonb OR "
-            "          value->'minutes' = 'null'::jsonb) AND "
-            "         (value->'seconds' @> '%(second)s'::jsonb OR "
-            "          value->'seconds' = 'null'::jsonb)"
-            ")"
-        )
         params = {'year': self.rhs.year,
                   'month': self.rhs.month,
                   'day': self.rhs.day,
@@ -113,6 +110,6 @@ class Contains(models.Lookup):
                   'minute': self.rhs.minute,
                   'second': self.rhs.second,
                   'field': lhs % lhs_params}
-        return lookup % params, []
+        return self.LOOKUP % params, []
 
 ScheduleSetField.register_lookup(Contains)
