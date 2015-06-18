@@ -24,5 +24,9 @@ def schedule_kwargs():
         'minutes': sorted(rnd.sample(Schedule.MINUTES,
                           rnd.randrange(1, len(Schedule.MINUTES)))),
         'seconds': sorted(rnd.sample(Schedule.SECONDS,
-                              rnd.randrange(1, len(Schedule.SECONDS))))
+                              rnd.randrange(1, len(Schedule.SECONDS)))),
+        'seconds_of_the_day': sorted(
+            rnd.sample(Schedule.SECONDS_OF_THE_DAY,
+            rnd.randrange(1, len(Schedule.SECONDS_OF_THE_DAY)))
+        )
     }

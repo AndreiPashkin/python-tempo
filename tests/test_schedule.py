@@ -32,11 +32,12 @@ def test_forward(kwargs, datetime, expected):
     assert actual == expected
 
 
-def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
-            weekdays=None, months=None, years=None):
+def forward(datetime, seconds_of_the_day=None, seconds=None, minutes=None,
+            hours=None, days=None, weekdays=None, months=None, years=None):
     """'Brute force' implementation of `Schedule.forward` functionality."""
     delta = dt.timedelta(seconds=1)
 
+    seconds_of_the_day = set(seconds_of_the_day or Schedule.SECONDS_OF_THE_DAY)
     seconds = set(seconds or Schedule.SECONDS)
     minutes = set(minutes or Schedule.MINUTES)
     hours = set(hours or Schedule.HOURS)
@@ -46,14 +47,15 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     years = set(years or Schedule.YEARS)
 
     years_sorted = sorted(years)
-
+    seconds_of_the_day_check = lambda d: (d.hour * 60 * 60 + d.minute * 60 +
+                                          d.second) in seconds_of_the_day
     checks = [
-        [(op.attrgetter('second'), seconds)],
-        [(op.attrgetter('minute'), minutes)],
-        [(op.attrgetter('hour'), hours)],
-        [(op.attrgetter('day'), days), (lambda d: d.weekday(), weekdays)],
-        [(op.attrgetter('month'), months)],
-        [(op.attrgetter('year'), years)]
+        [(lambda d: d.second in seconds), seconds_of_the_day_check],
+        [(lambda d: d.minute in minutes), seconds_of_the_day_check],
+        [(lambda d: d.hour in hours), seconds_of_the_day_check],
+        [(lambda d: d.day in days), lambda d: d.weekday() in weekdays],
+        [lambda d: d.month in months],
+        [lambda d: d.year in years]
     ]
 
     def find_closest_year(datetime):
@@ -75,8 +77,7 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
     while True:
         initial_year = datetime.year
         for check_list in checks:
-            if not any(getter(datetime) in data
-                       for getter, data in check_list):
+            if not any(check(datetime) for check in check_list):
                 break
         else:
             yield datetime
@@ -99,12 +100,6 @@ def forward(datetime, seconds=None, minutes=None, hours=None, days=None,
 
         if datetime.day not in days and datetime.weekday() not in weekdays:
             datetime += relativedelta(days=1, hour=0, minute=0, second=0)
-
-        if datetime.hour not in hours:
-            datetime += relativedelta(hours=1, minute=0, second=0)
-
-        if datetime.minute not in minutes:
-            datetime += relativedelta(minutes=1, second=0)
 
         if datetime.year > max_year:
             break

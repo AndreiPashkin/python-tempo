@@ -15,29 +15,33 @@ class Schedule(object):
 
     Datetime objects can be tests for containment in schedule objects.
     """
-    SECONDS  = list(range(0, 60))
-    MINUTES  = list(range(0, 60))
-    HOURS    = list(range(0, 24))
-    DAYS     = list(range(1, 31 + 1))
-    WEEKDAYS = list(range(1, 7 + 1))
-    MONTHS   = list(range(1, 12 + 1))
-    YEARS    = list(range(dt.MINYEAR, dt.MAXYEAR + 1))
-    ATTRS    = ('_seconds_value', '_minutes_value', '_hours_value',
-                '_days_value', '_weekdays_value', '_months_value',
-                '_years_value')
+    SECONDS_OF_THE_DAY = list(range(0, 60 * 60 * 24))
+    SECONDS            = list(range(0, 60))
+    MINUTES            = list(range(0, 60))
+    HOURS              = list(range(0, 24))
+    DAYS               = list(range(1, 31 + 1))
+    WEEKDAYS           = list(range(1, 7 + 1))
+    MONTHS             = list(range(1, 12 + 1))
+    YEARS              = list(range(dt.MINYEAR, dt.MAXYEAR + 1))
+    ATTRS              = ('_seconds_of_the_day_value', '_seconds_value',
+                          '_minutes_value', '_hours_value', '_days_value',
+                          '_weekdays_value', '_months_value', '_years_value')
 
     __slots__ = ATTRS
 
-    def __init__(self, seconds=None, minutes=None, hours=None, days=None,
-                 weekdays=None, months=None, years=None):
+    def __init__(self, seconds_of_the_day=None, seconds=None, minutes=None,
+                 hours=None, days=None, weekdays=None, months=None,
+                 years=None):
         for value, attr, possible in [
-            (seconds,  '_seconds_value',  self.SECONDS),
-            (minutes,  '_minutes_value',  self.MINUTES),
-            (hours,    '_hours_value',    self.HOURS),
-            (days,     '_days_value',     self.DAYS),
+            (seconds_of_the_day, '_seconds_of_the_day_value',
+             self.SECONDS_OF_THE_DAY),
+            (seconds, '_seconds_value', self.SECONDS),
+            (minutes, '_minutes_value', self.MINUTES),
+            (hours, '_hours_value', self.HOURS),
+            (days, '_days_value', self.DAYS),
             (weekdays, '_weekdays_value', self.WEEKDAYS),
-            (months,   '_months_value',   self.MONTHS),
-            (years,    '_years_value',    self.YEARS)
+            (months, '_months_value', self.MONTHS),
+            (years, '_years_value', self.YEARS)
         ]:
             if value is not None and len(value) > 0:
                 assert set(value) <= set(possible)
@@ -73,6 +77,10 @@ class Schedule(object):
     def _seconds(self):
         return default(self._seconds_value, self.SECONDS)
 
+    @property
+    def _seconds_of_the_day(self):
+        return default(self._seconds_of_the_day_value, self.SECONDS_OF_THE_DAY)
+
     def _iteryears(self):
         return iter(self._years)
 
@@ -88,22 +96,39 @@ class Schedule(object):
                 yield day
 
     def _iterhours(self):
-        return iter(self._hours)
+        return iter(sorted(
+            set(self._hours) |
+            {s // 60 // 60 for s in self._seconds_of_the_day}
+        ))
 
-    def _iterminutes(self):
-        return iter(self._minutes)
+    def _iterminutes(self, hour):
+        return iter(sorted(
+            (set(self._minutes)
+             if hour in self._hours
+             else set()) |
+            {(s // 60) % 60 for s in self._seconds_of_the_day
+             if (s // 60 // 60) == hour}
+        ))
 
-    def _iterseconds(self):
-        return iter(self._seconds)
+    def _iterseconds(self, hour, minute):
+        return iter(sorted(
+            (set(self._seconds)
+             if hour in self._hours and minute in self._minutes
+             else set()) |
+            {s % 60 for s in self._seconds_of_the_day
+             if s // 60 // 60 == hour and (s // 60) % 60 == minute}
+        ))
 
     def __contains__(self, item):
         return (
             item.year in self._years and
             item.month in self._months and
             (item.day in self._days or item.weekday() in self._weekdays) and
-            item.hour in self._hours and
-            item.minute in self._minutes and
-            item.second in self._seconds
+            ((item.hour in self._hours and
+              item.minute in self._minutes and
+              item.second in self._seconds) or
+             ((item.hour * 60 * 60 + item.minute * 60 + item.second) in
+              self._seconds_of_the_day))
         )
 
     @staticmethod
@@ -147,8 +172,9 @@ class Schedule(object):
             (lambda ctx: self._itermonths(), 'month'),
             (lambda ctx: self._iterdays(ctx['year'], ctx['month']), 'day'),
             (lambda ctx: self._iterhours(), 'hour'),
-            (lambda ctx: self._iterminutes(), 'minute'),
-            (lambda ctx: self._iterseconds(), 'second'),
+            (lambda ctx: self._iterminutes(ctx['hour']), 'minute'),
+            (lambda ctx: self._iterseconds(ctx['hour'], ctx['minute']),
+             'second'),
         ]
 
         start = default(start, dt.datetime.now())
@@ -171,22 +197,23 @@ class Schedule(object):
                             ctx['day'] == start.day
                          else self._iterhours(),
              'hour'),
-            (lambda ctx: (m for m in self._iterminutes()
+            (lambda ctx: (m for m in self._iterminutes(ctx['hour'])
                           if m >= start.minute)
                          if ctx['year'] == start.year and
                             ctx['month'] == start.month and
                             ctx['day'] == start.day and
                             ctx['hour'] == start.hour
-                         else self._iterminutes(),
+                         else self._iterminutes(ctx['hour']),
              'minute'),
-            (lambda ctx: (s for s in self._iterseconds()
+            (lambda ctx: (s for s in self._iterseconds(ctx['hour'],
+                                                       ctx['minute'])
                           if s >= start.second)
                          if ctx['year'] == start.year and
                             ctx['month'] == start.month and
                             ctx['day'] == start.day and
                             ctx['hour'] == start.hour and
                             ctx['minute'] == start.minute
-                         else self._iterseconds(),
+                         else self._iterseconds(ctx['hour'], ctx['minute']),
              'second'),
         ]
 
