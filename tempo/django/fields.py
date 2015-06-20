@@ -6,6 +6,7 @@ from django.db import models
 import json
 from tempo.schedule import Schedule
 from tempo.scheduleset import ScheduleSet
+from tempo.django import forms
 
 
 class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
@@ -40,8 +41,8 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
         )
 
     def to_python(self, value):
-        if value is None:
-            return value
+        if value is None or value == '':
+            return None
         elif isinstance(value, ScheduleSet):
             return value
         if isinstance(value, dict):
@@ -59,6 +60,11 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
             return None
         return json.dumps(self.schedulset_to_dict(value),
                           cls=DjangoJSONEncoder)
+
+    def formfield(self, **kwargs):
+        defaults = {'form_class': forms.ScheduleSetField}
+        defaults.update(kwargs)
+        return super(ScheduleSetField, self).formfield(**defaults)
 
 
 class Contains(models.Lookup):

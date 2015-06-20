@@ -1,0 +1,16 @@
+.tempo-base-form-container {
+  clear: both;
+  padding-left: 30px;
+  margin-left: 7em;
+  padding-top: 1em;
+}
+.tempo-base-form-container .tempo-weekly-repeat-on {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.tempo-base-form-container .tempo-weekly-repeat-on li .tempo-weekly-segment-repeat-on-weekday,
+.tempo-base-form-container .tempo-weekly-repeat-on li .tempo-weekly-segment-repeat-on-from,
+.tempo-base-form-container .tempo-weekly-repeat-on li .tempo-weekly-segment-repeat-on-to {
+  margin-right: 1em;
+}
