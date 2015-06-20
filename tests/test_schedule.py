@@ -5,6 +5,7 @@ import operator as op
 import random as rnd
 import datetime as dt
 from itertools import islice
+from funclib.utils import default
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -24,6 +25,38 @@ from tests.utils import schedule_kwargs
         dt.datetime(2000, 3, 1, 0, 0, 1),
         dt.datetime(2000, 3, 1, 0, 0, 2)
     ]),
+    # Case where seconds_of_the_day allow to pass empty
+    # hours, minutes, seconds
+    ({'years': [2000], 'months': [3],
+      'hours': [], 'minutes': [], 'seconds': [],
+      'seconds_of_the_day': [15]},
+     dt.datetime(2000, 1, 1, 5, 0, 0), [
+        dt.datetime(2000, 3, 1, 0, 0, 15),
+    ]),
+    # Mixed seconds_of_the_day and hours, minutes, seconds
+    ({'years': [2000], 'months': [3],
+      'hours': [0], 'minutes': [0], 'seconds': [1],
+      'seconds_of_the_day': [15]},
+     dt.datetime(2000, 1, 1, 5, 0, 0), [
+        dt.datetime(2000, 3, 1, 0, 0, 1),
+        dt.datetime(2000, 3, 1, 0, 0, 15),
+    ]),
+    ({'years': [2000], 'months': [3],
+      'hours': [0], 'minutes': [0], 'seconds': [1, 2],
+      'seconds_of_the_day': [75, 76]},
+     dt.datetime(2000, 1, 1, 5, 0, 0), [
+        dt.datetime(2000, 3, 1, 0, 0, 1),
+        dt.datetime(2000, 3, 1, 0, 0, 2),
+        dt.datetime(2000, 3, 1, 0, 1, 15),
+        dt.datetime(2000, 3, 1, 0, 1, 16),
+    ]),
+    # Empty seconds_of_the_day and non-empty hours, minutes, seconds
+    ({'years': [2000], 'months': [3],
+      'hours': [3], 'minutes': [2], 'seconds': [15],
+      'seconds_of_the_day': []},
+     dt.datetime(2000, 1, 1, 5, 0, 0), [
+        dt.datetime(2000, 3, 1, 3, 2, 15),
+    ]),
 ])
 def test_forward(kwargs, datetime, expected):
     """Corner cases of `Schedule.forward`."""
@@ -37,22 +70,24 @@ def forward(datetime, seconds_of_the_day=None, seconds=None, minutes=None,
     """'Brute force' implementation of `Schedule.forward` functionality."""
     delta = dt.timedelta(seconds=1)
 
-    seconds_of_the_day = set(seconds_of_the_day or Schedule.SECONDS_OF_THE_DAY)
-    seconds = set(seconds or Schedule.SECONDS)
-    minutes = set(minutes or Schedule.MINUTES)
-    hours = set(hours or Schedule.HOURS)
-    days = set(days or Schedule.DAYS)
-    weekdays = set(weekdays or Schedule.WEEKDAYS)
-    months = set(months or Schedule.MONTHS)
-    years = set(years or Schedule.YEARS)
+    seconds_of_the_day = set(default(seconds_of_the_day,
+                                     Schedule.SECONDS_OF_THE_DAY))
+    seconds = set(default(seconds, Schedule.SECONDS))
+    minutes = set(default(minutes, Schedule.MINUTES))
+    hours = set(default(hours, Schedule.HOURS))
+    days = set(default(days, Schedule.DAYS))
+    weekdays = set(default(weekdays, Schedule.WEEKDAYS))
+    months = set(default(months, Schedule.MONTHS))
+    years = set(default(years, Schedule.YEARS))
 
     years_sorted = sorted(years)
     seconds_of_the_day_check = lambda d: (d.hour * 60 * 60 + d.minute * 60 +
                                           d.second) in seconds_of_the_day
     checks = [
-        [(lambda d: d.second in seconds), seconds_of_the_day_check],
-        [(lambda d: d.minute in minutes), seconds_of_the_day_check],
-        [(lambda d: d.hour in hours), seconds_of_the_day_check],
+        [(lambda d: d.second in seconds and
+                    d.minute in minutes and
+                    d.hour in hours),
+         seconds_of_the_day_check],
         [(lambda d: d.day in days), lambda d: d.weekday() in weekdays],
         [lambda d: d.month in months],
         [lambda d: d.year in years]

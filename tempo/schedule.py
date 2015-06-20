@@ -31,6 +31,22 @@ class Schedule(object):
     def __init__(self, seconds_of_the_day=None, seconds=None, minutes=None,
                  hours=None, days=None, weekdays=None, months=None,
                  years=None):
+        composite_time = all(e is None or len(e) > 0
+                             for e in [seconds, minutes, hours])
+        seconds_time = (seconds_of_the_day is None or
+                        len(seconds_of_the_day) > 0)
+
+        if not (seconds_time or composite_time):
+            raise ValueError
+
+        if ((days is not None and len(days) == 0) and
+            (weekdays is not None and len(weekdays) == 0)):
+            raise ValueError
+
+        if (months is not None and len(months) == 0 or
+            years is not None and len(years) == 0):
+            raise ValueError
+
         for value, attr, possible in [
             (seconds_of_the_day, 'seconds_of_the_day',
              self.SECONDS_OF_THE_DAY),
@@ -42,7 +58,7 @@ class Schedule(object):
             (months, 'months', self.MONTHS),
             (years, 'years', self.YEARS)
         ]:
-            if value is not None and len(value) > 0:
+            if value is not None:
                 assert set(value) <= set(possible)
                 setattr(self, attr, sorted(value))
             else:
