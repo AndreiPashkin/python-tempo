@@ -34,8 +34,8 @@ class ScheduleSetField(Field):
                     weekdays=[int(repeat_on['weekday'])],
                     days=[],
                     seconds_of_the_day=list(range(
-                        int(Decimal(str(repeat_on['from'])) * 60 * 60),
-                        int(Decimal(str(repeat_on['to'])) * 60 * 60) + 1)
+                        int(Decimal(repeat_on['from']) * 60 * 60),
+                        int(Decimal(repeat_on['to']) * 60 * 60) + 1)
                     ),
                     seconds=[], minutes=[], hours=[]
                 )

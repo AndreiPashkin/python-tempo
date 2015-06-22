@@ -110,9 +110,9 @@
 
     TimeSegmentView.prototype.getValue = function() {
         return {
-            'weekday': Number(this.element.find('.tempo-weekly-segment-repeat-on-weekday').val()),
-            'from': Number(this.element.find('.tempo-weekly-segment-repeat-on-from').val()),
-            'to': Number(this.element.find('.tempo-weekly-segment-repeat-on-to').val())
+            'weekday': this.element.find('.tempo-weekly-segment-repeat-on-weekday').val(),
+            'from': this.element.find('.tempo-weekly-segment-repeat-on-from').val(),
+            'to': this.element.find('.tempo-weekly-segment-repeat-on-to').val()
         };
     };
 
