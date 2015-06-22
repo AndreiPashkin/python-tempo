@@ -58,7 +58,7 @@
                      '20.0': '8:00 pm',  '20.5': '8:30 pm',  '21.0': '9:00 pm',
                      '21.5': '9:30 pm',  '22.0': '10:00 pm',
                      '22.5': '10:30 pm', '23.0': '11:00 pm',
-                     '23.5': '11:30 pm'};
+                     '23.5': '11:30 pm', '24.0': '12:00 am (next day\'s midnight )'};
 
     function TimeSegmentView(weekday, from, to) {
         this.element = $('<li/>', {'class': 'tempo-weekly-repeat-on-segment'});
