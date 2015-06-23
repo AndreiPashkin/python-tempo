@@ -26,8 +26,9 @@ class ScheduleSetField(Field):
         elif repeats == 'weekly':
             schedules = []
             for repeat_on in value['repeatOn']:
-                if Decimal(repeat_on['from']) > Decimal(repeat_on['to']):
-                    raise ValidationError(_('"From" is greater than "to".'),
+                if Decimal(repeat_on['from']) >= Decimal(repeat_on['to']):
+                    raise ValidationError(_('"From" is greater than "to" '
+                                            'or equal to it.'),
                                           code='invalid')
 
                 schedule = Schedule(
@@ -35,7 +36,7 @@ class ScheduleSetField(Field):
                     days=[],
                     seconds_of_the_day=list(range(
                         int(Decimal(repeat_on['from']) * 60 * 60),
-                        int(Decimal(repeat_on['to']) * 60 * 60) + 1)
+                        int(Decimal(repeat_on['to']) * 60 * 60))
                     ),
                     seconds=[], minutes=[], hours=[]
                 )
