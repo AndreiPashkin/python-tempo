@@ -286,10 +286,13 @@
         repeats.change(repeatsChangeHandler);
         repeatsChangeHandler().setValue(value);
 
-        base.on('click change blur keyup', function() {
+        function update() {
             var value = view.getValue();
             console.log(value);
             that.val(JSON.stringify(value));
-        });
+        }
+
+        base.on('click change blur keyup', update);
+        update();
     };
 }(django.jQuery));
