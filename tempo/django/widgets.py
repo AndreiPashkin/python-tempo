@@ -31,7 +31,7 @@ class ScheduleSetWidget(Input):
             return {
                 'repeats': 'weekly',
                 'repeatOn': [
-                    {'weekdays': s.weekdays[0],
+                    {'weekday': str(s.weekdays[0]),
                      'from': "{0:.1f}".format(Decimal(s.seconds_of_the_day[0]) / 60 / 60),
                      'to': "{0:.1f}".format(Decimal(s.seconds_of_the_day[-1]) / 60 / 60)}
                     for s in include
