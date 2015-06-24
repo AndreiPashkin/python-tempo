@@ -152,7 +152,17 @@
     TimeSegmentsView.prototype.addSegment = function(weekday, from, to) {
         console.log('addSegment');
         var oldSegment = this.segments[this.segments.length - 1],
-            newSegment = new TimeSegmentView(weekday, from, to);
+            oldValue,
+            newSegment;
+
+        if (oldSegment) {
+            oldValue = oldSegment.getValue();
+            weekday = String(((Number(oldValue.weekday) - 1) % 7) + 1 + 1);
+            from = oldValue.from;
+            to = oldValue.to;
+        }
+
+        newSegment = new TimeSegmentView(weekday, from, to);
 
         this.element.append(newSegment.render().element);
         this.segments.push(newSegment);
