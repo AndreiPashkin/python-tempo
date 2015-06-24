@@ -1,4 +1,5 @@
-.tempo-base-form-container {
+.tempo-base-form-container,
+.tempo-base-summary {
   clear: both;
   padding-left: 30px;
   margin-left: 7em;

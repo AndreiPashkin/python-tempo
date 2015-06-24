@@ -11,6 +11,7 @@
         "        </label>" +
         "    </div>" +
         "    <div class='tempo-base-form-container'></div>" +
+        "    <div class='tempo-base-summary'></div>" +
         "</div>",
         WEEKLY_TMPL =
         "<form>" +
@@ -270,6 +271,7 @@
 
         var repeats = base.find('.tempo-base-repeats'),
             container = base.find('.tempo-base-form-container'),
+            summary = base.find('.tempo-base-summary'),
             view;
         repeats.val(value.repeats);
 
@@ -286,10 +288,27 @@
         repeats.change(repeatsChangeHandler);
         repeatsChangeHandler().setValue(value);
 
+        function makeSummary(value) {
+            var summary, i, weekday, from, to;
+            if (value.repeats === 'monthly') {
+                summary = 'Every ' + value.repeatOn + ' day of every month';
+            } else if (value.repeats === 'weekly') {
+                summary = 'Every week';
+                for (i = 0; i < value.repeatOn.length; i++ ) {
+                    weekday = value.repeatOn[i].weekday;
+                    from = value.repeatOn[i].from;
+                    to = value.repeatOn[i].to;
+                    summary += ', on ' + WEEKDAYS[weekday] + ' from ' + INTERVALS[from] + ' to ' + INTERVALS[to];
+                }
+            }
+            return summary;
+        }
+
         function update() {
             var value = view.getValue();
             console.log(value);
             that.val(JSON.stringify(value));
+            summary.text(makeSummary(value));
         }
 
         base.on('click change blur keyup', update);
