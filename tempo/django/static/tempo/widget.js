@@ -156,7 +156,7 @@
             oldValue,
             newSegment;
 
-        if (oldSegment) {
+        if (oldSegment && !(weekday && from && to)) {
             oldValue = oldSegment.getValue();
             weekday = String(((Number(oldValue.weekday) - 1) % 7) + 1 + 1);
             from = oldValue.from;
