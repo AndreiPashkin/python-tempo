@@ -27,15 +27,15 @@ class ScheduleSetField(with_metaclass(models.SubfieldBase, models.Field)):
     @classmethod
     def schedulset_to_dict(cls, scheduleset):
         return {
-            'include': map(cls.schedule_to_dict, scheduleset.include),
-            'exclude': map(cls.schedule_to_dict, scheduleset.exclude)
+            'include': [cls.schedule_to_dict(s) for s in scheduleset.include],
+            'exclude': [cls.schedule_to_dict(s) for s in scheduleset.exclude]
         }
 
     @classmethod
     def scheduleset_from_dict(cls, dictionary):
         return ScheduleSet(
-            include=map(cls.schedule_from_dict, dictionary['include']),
-            exclude=map(cls.schedule_from_dict, dictionary['exclude'])
+            include=[cls.schedule_from_dict(s) for s in dictionary['include']],
+            exclude=[cls.schedule_from_dict(s) for s in dictionary['exclude']]
                     if 'exclude' in dictionary
                     else None
         )
