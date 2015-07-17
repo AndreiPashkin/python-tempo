@@ -8,11 +8,13 @@ from funclib.utils import resolve_args
 
 class Interval(object):
     """
-    Interval(self, stop)
-    Interval(self, start, stop, step=1)
+    Interval(stop)
+    Interval(start, stop, step=1)
 
-    Analogy of Python's 'range', but capable of handling float values and
-    make a containment tests.
+    Represents an interval between two numbers with optional 'step'.
+
+    It's similar to Python's 'range', but capable of handling float values and
+    making a containment tests.
 
     Parameters
     ----------
@@ -28,7 +30,7 @@ class Interval(object):
     >>> interval = Interval(5)
     >>> interval
     ... Interval(start=0.0, stop=5.0, step=1.0)
-    >>> list(intrerval)
+    >>> list(interval)
     ... [Decimal('0'), Decimal('1'), Decimal('2'), Decimal('3'), Decimal('4'),
     ...  Decimal('5')]
     >>> 3 in interval
