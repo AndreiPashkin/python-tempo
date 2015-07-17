@@ -17,7 +17,7 @@ MONTHS_IN_YEAR = 12
 
 
 class Unit:
-    """"Enum" with supported time units."""
+    """"Enumeration of supported time units."""
     SECOND  = 'second'
     MINUTE  = 'minute'
     HOUR    = 'hour'
@@ -88,7 +88,7 @@ def floor(datetime, unit):
     datetime : datetime.datetime
         A datetime to floor.
     unit : str
-        Unit to which flooring should be performed.
+        Unit by which flooring should be performed.
 
     Returns
     -------
@@ -109,17 +109,17 @@ def floor(datetime, unit):
 
 
 def delta(datetime1, datetime2, unit):
-    """Calculates time delta between two dates in
-    given 'unit'.
+    """Calculates time delta between two dates. Returned delta will be
+    expressed in given 'unit'.
 
     Parameters
     ----------
     datetime1 : datetime.datetime
-        Start date.
+        First date.
     datetime2 : datetime.datetime
-        End date.
+        Second date.
     unit : str
-        Unit in which delta will be expressed.
+        Unit of delta.
 
     Returns
     -------
@@ -149,26 +149,26 @@ def delta(datetime1, datetime2, unit):
 
 
 class TimeInterval(object):
-    """An interval of unit of time (second, week, year, etc)
-    recurring "within" bounds of another unit of time that have higher
-    "place" in structure of numerical representation of time.
-    For example minute can recur within hour or year, but can't recur
-    within second.
+    """An interval of time expressed in some 'unit' of time
+    (second, week, year, etc), recurring with some 'recurrence',
+    also expressed in some unit of time.
+    For example minutes interval can recur hourly or yearly,
+    but can't recur secondly.
 
-    Recurrence can have special value 'None',
-    which means "no recurrence" - interval of unit happen from
-    "the beginning of time".
-    By convention "the beginning of time" is 1970-1-1 00:00:00.
+    With `None` passed as 'recurrence', time interval will be defined without
+    recurrence, just as a single non-recurring interval between two points
+    in time and counted from "the beginning of time". By convention
+    "the beginning of time" is 1-1-1 00:00:00.
 
     Parameters
     ----------
     interval : tempo.interval.Interval
-        Interval of 'unit' which will recur.
+        Recurring interval of time.
     unit : str
-       Unit of interval.
+       Unit of time in which time interval is expressed.
     recurrence : str, optional
-       Recurrence with which interval of unit will recur.
-       None means interval of unit from the beginning of time.
+       Recurrence of time interval. Can be (and by default is) `None`,
+       which means - "no recurrence".
 
     Examples
     --------
@@ -197,12 +197,12 @@ class TimeInterval(object):
         self.interval = interval
 
     def __contains__(self, item):
-        """Test given datetime 'item' for containment.
+        """Test given datetime 'item' for containment in the time interval.
 
         Parameters
         ----------
         item : datetime.datetime
-            A datetime object to test.
+            A 'datetime' object to test.
 
         Returns
         -------
@@ -217,9 +217,9 @@ class TimeInterval(object):
 
             1. Given datetime floored to unit of 'recurrence' and stored.
             2. Then given datetime floored to unit of 'unit' and stored.
-            3. Delta between resulting dates is calculated and expressed
-               in units of 'unit'. For example if delta is "2 days" and
-               'unit' is minutes, delta will be "2*24*60 minutes".
+            3. Delta between resulting datetime objects is calculated and
+               expressed in units of 'unit'. For example if delta is "2 days"
+               and 'unit' is minutes, delta will be "2*24*60 minutes".
 
             If recurrence is not set:
 
