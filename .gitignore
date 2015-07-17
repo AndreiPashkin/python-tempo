@@ -67,3 +67,6 @@ target/
 *.iml
 out
 gen
+
+# KDE Dolphin
+.directory
