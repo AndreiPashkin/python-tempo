@@ -32,3 +32,22 @@ def test_iteration(start, stop, step, expected):
 def test_containment(interval, item, expected):
     """Containment test."""
     assert (item in interval) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Interval(10), Interval(10), True),
+    (Interval(1, 15), Interval(1, 15), True),
+    (Interval(1, 15, 3), Interval(1, 15, 3), True),
+    (Interval(1.5, 15.5, 0.5), Interval(1.5, 15.5, 0.5), True),
+    (Interval(10), Interval(15), False),
+    (Interval(1, 15), Interval(1, 25), False),
+    (Interval(1, 15, 3), Interval(1, 25, 3), False),
+    (Interval(1.5, 15.5, 0.5), Interval(1.5, 25.5, 0.5), False),
+
+])
+def test_eq_hash(first, second, expected):
+    """Cases for equality test and hashing."""
+    assert (first == second) == expected
+
+    if expected:
+        assert hash(first) == hash(second)

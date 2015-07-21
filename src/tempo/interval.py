@@ -91,3 +91,11 @@ class Interval(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def __eq__(self, other):
+        return (self.start == other.start and
+                self.stop == other.stop and
+                self.step == other.step)
+
+    def __hash__(self):
+        return hash((self.start, self.stop, self.step))
