@@ -242,6 +242,14 @@ class TimeInterval(object):
 
         return time_in_unit in self.interval
 
+    def __eq__(self, other):
+        return (self.interval == other.interval and
+                self.unit == other.unit and
+                self.recurrence == other.recurrence)
+
+    def __hash__(self):
+        return hash((self.interval, self.unit, self.recurrence))
+
     def __str__(self):
         return ('TimeInterval(interval={interval}, unit={unit}, '
                 'recurrence={recurrence})'

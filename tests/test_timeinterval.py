@@ -87,3 +87,17 @@ def test_containment(unit, recurrence, interval, datetime, expected):
     timeinterval = TimeInterval(Interval(*interval), unit, recurrence)
 
     assert (datetime in timeinterval) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (TimeInterval(Interval(10), U.MINUTE, U.HOUR),
+     TimeInterval(Interval(10), U.MINUTE, U.HOUR), True),
+    (TimeInterval(Interval(10), U.MINUTE, U.HOUR),
+     TimeInterval(Interval(10), U.MINUTE, U.YEAR), False),
+])
+def test_eq_hash(first, second, expected):
+    """Cases for equality test and hashing."""
+    assert (first == second) == expected
+
+    if expected:
+        assert hash(first) == hash(second)
