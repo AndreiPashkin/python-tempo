@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # coding=utf-8
+import calendar
 import datetime as dt
+import math
+
+from six.moves import range
 
 from tempo.unit import (Unit, SECONDS_IN_MINUTE, SECONDS_IN_HOUR,
-                        SECONDS_IN_DAY)
+                        SECONDS_IN_DAY, DAYS_IN_WEEK, DAYS_OF_COMMON_YEAR,
+                        DAYS_OF_LEAP_YEAR)
 
 
 def _floor_by_second(datetime):
@@ -113,3 +118,66 @@ def delta(datetime1, datetime2, unit):
                 datetime1.month + datetime2.month)
     elif unit == Unit.YEAR:
         return datetime2.year - datetime1.year
+
+
+def add_delta(datetime, delta, unit):
+    """Adds a 'delta' expressed in 'unit' to given 'datetime'.
+
+    Parameters
+    ----------
+    datetime : datetime.datetime
+        A datetime to which delta will be added.
+    delta : int
+        Delta to add.
+    unit : str
+        Units of delta.
+
+    Returns
+    -------
+    datetime.datetime
+        A new datetime object with added delta.
+
+    Examples
+    --------
+    >>> from datetime import datetime
+    >>> add_delta(datetime(2000, 10, 10), 5, Unit.DAY)
+    ... datetime(2000, 10, 15, 0, 0)
+    """
+    if unit == Unit.SECOND:
+        return datetime + dt.timedelta(seconds=delta)
+    elif unit == Unit.MINUTE:
+        return datetime + dt.timedelta(minutes=delta)
+    elif unit == Unit.HOUR:
+        return datetime + dt.timedelta(hours=delta)
+    elif unit == Unit.DAY:
+        return datetime + dt.timedelta(days=delta)
+    elif unit == Unit.WEEK:
+        return datetime + dt.timedelta(days=DAYS_IN_WEEK * delta)
+    elif unit == Unit.MONTH:
+        days = 0
+        while delta != 0:
+            start, end = sorted((datetime.month,
+                                 max(min(datetime.month + delta, 12), 1)))
+
+            if calendar.isleap(datetime.year):
+                DAYS_OF_YEAR = DAYS_OF_LEAP_YEAR
+            else:
+                DAYS_OF_YEAR = DAYS_OF_COMMON_YEAR
+
+            days += int(math.copysign(sum(DAYS_OF_YEAR[start - 1:end - 1]),
+                                      delta))
+            delta -= int(math.copysign(end - start, delta))
+
+        return datetime + dt.timedelta(days=days)
+    elif unit == Unit.YEAR:
+        days = 0
+        start, end = sorted((datetime.year, datetime.year + delta))
+        for year in range(start, end):
+            if calendar.isleap(year):
+                days += sum(DAYS_OF_LEAP_YEAR)
+            else:
+                days += sum(DAYS_OF_COMMON_YEAR)
+
+        return datetime + dt.timedelta(days=int(math.copysign(days, delta)))
+    else:
+        raise ValueError
