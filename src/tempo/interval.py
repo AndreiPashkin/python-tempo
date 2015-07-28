@@ -9,12 +9,9 @@ from funclib.utils import resolve_args
 class Interval(object):
     """
     Interval(stop)
-    Interval(start, stop, step=1)
+    Interval(start, stop)
 
-    Represents an interval between two numbers with optional 'step'.
-
-    It's similar to Python's 'range', but capable of handling float values and
-    making a containment tests.
+    Represents an interval between two numbers.
 
     Parameters
     ----------
@@ -22,14 +19,12 @@ class Interval(object):
         Start of the interval.
     stop : decimal.Decimal or float or int
         Inclusive stop of the interval.
-    step : decimal.Decimal or float or int
-        Step of the interval.
 
     Examples
     --------
     >>> interval = Interval(5)
     >>> interval
-    ... Interval(start=0.0, stop=5.0, step=1.0)
+    ... Interval(start=0.0, stop=5.0)
     >>> list(interval)
     ... [Decimal('0'), Decimal('1'), Decimal('2'), Decimal('3'), Decimal('4'),
     ...  Decimal('5')]
@@ -38,13 +33,13 @@ class Interval(object):
     >>> 10 in interval
     ... False
     """
-    _DEFAULTS = {'start': 0, 'step': 1}
+    _DEFAULTS = {'start': 0}
 
     def __init__(self, *args, **kwargs):
         try:
             arguments = resolve_args(['stop'], args, kwargs)
         except TypeError:
-            arguments = resolve_args(['start', 'stop', 'step'], args, kwargs,
+            arguments = resolve_args(['start', 'stop'], args, kwargs,
                                      self._DEFAULTS)
 
         final_arguments = self._DEFAULTS.copy()
@@ -62,7 +57,7 @@ class Interval(object):
 
         while current <= self.stop:
             yield current
-            current += self.step
+            current += 1
 
     def __contains__(self, item):
         """Containment test.
@@ -76,26 +71,20 @@ class Interval(object):
         -------
         bool
         """
-        if not isinstance(item, Decimal):
-            item = Decimal(str(item))
-
         return (item >= self.start and
-                item <= self.stop and
-                ((self.start - item) % self.step) == 0)
+                item <= self.stop)
 
     def __str__(self):
-        return ('Interval(start={start}, stop={stop}, step={step})'
+        return ('Interval(start={start}, stop={stop})'
                 .format(start=repr(float(self.start)),
-                        stop=repr(float(self.stop)),
-                        step=repr(float(self.step))))
+                        stop=repr(float(self.stop))))
 
     def __repr__(self):
         return self.__str__()
 
     def __eq__(self, other):
         return (self.start == other.start and
-                self.stop == other.stop and
-                self.step == other.step)
+                self.stop == other.stop)
 
     def __hash__(self):
-        return hash((self.start, self.stop, self.step))
+        return hash((self.start, self.stop))

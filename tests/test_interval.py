@@ -7,27 +7,24 @@ import pytest
 from tempo.interval import Interval
 
 
-@pytest.mark.parametrize('start, stop, step, expected', [
-    (0, 10, 1, range(11)),
-    (0, 10, 2, range(0, 12, 2)),
-    (Decimal('0.1'), Decimal('5.1'), 1, [Decimal('0.1'), Decimal('1.1'),
-                                         Decimal('2.1'), Decimal('3.1'),
-                                         Decimal('4.1'), Decimal('5.1')])
+@pytest.mark.parametrize('start, stop, expected', [
+    (0, 10, range(11)),
+    (Decimal('0.1'), Decimal('5.1'), [Decimal('0.1'), Decimal('1.1'),
+                                      Decimal('2.1'), Decimal('3.1'),
+                                      Decimal('4.1'), Decimal('5.1')])
 ])
-def test_iteration(start, stop, step, expected):
+def test_iteration(start, stop, expected):
     """Iteration over values."""
-    assert list(Interval(start, stop, step)) == list(expected)
+    assert list(Interval(start, stop)) == list(expected)
 
 
 @pytest.mark.parametrize('interval, item, expected', [
     (Interval(10), 5, True),
     (Interval(10), 11, False),
-    (Interval(0, 10, 2), 6, True),
-    (Interval(0, 10, 2), 7, False),
+    (Interval(0, 10), 5, True),
+    (Interval(0, 10), 15, False),
     (Interval(Decimal('0.1'), Decimal('5.1')), Decimal('3.1'), True),
     (Interval(Decimal('0.1'), Decimal('5.1')), Decimal('6.1'), False),
-    (Interval(Decimal('0.1'), Decimal('5.1'), 2), Decimal('4.1'), True),
-    (Interval(Decimal('0.1'), Decimal('5.1'), 2), Decimal('3.1'), False),
 ])
 def test_containment(interval, item, expected):
     """Containment test."""
@@ -37,13 +34,10 @@ def test_containment(interval, item, expected):
 @pytest.mark.parametrize('first, second, expected', [
     (Interval(10), Interval(10), True),
     (Interval(1, 15), Interval(1, 15), True),
-    (Interval(1, 15, 3), Interval(1, 15, 3), True),
-    (Interval(1.5, 15.5, 0.5), Interval(1.5, 15.5, 0.5), True),
+    (Interval(1.5, 15.5), Interval(1.5, 15.5), True),
     (Interval(10), Interval(15), False),
     (Interval(1, 15), Interval(1, 25), False),
-    (Interval(1, 15, 3), Interval(1, 25, 3), False),
-    (Interval(1.5, 15.5, 0.5), Interval(1.5, 25.5, 0.5), False),
-
+    (Interval(1.5, 15.5), Interval(1.5, 25.5), False),
 ])
 def test_eq_hash(first, second, expected):
     """Cases for equality test and hashing."""
