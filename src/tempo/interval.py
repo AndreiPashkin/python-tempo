@@ -58,8 +58,7 @@ class Interval(object):
         -------
         bool
         """
-        return (item >= self.start and
-                item <= self.stop)
+        return self.start <= item <= self.stop
 
     def __str__(self):
         return ('Interval(start={start}, stop={stop})'
