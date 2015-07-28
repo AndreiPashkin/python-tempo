@@ -7,17 +7,6 @@ import pytest
 from tempo.interval import Interval
 
 
-@pytest.mark.parametrize('start, stop, expected', [
-    (0, 10, range(11)),
-    (Decimal('0.1'), Decimal('5.1'), [Decimal('0.1'), Decimal('1.1'),
-                                      Decimal('2.1'), Decimal('3.1'),
-                                      Decimal('4.1'), Decimal('5.1')])
-])
-def test_iteration(start, stop, expected):
-    """Iteration over values."""
-    assert list(Interval(start, stop)) == list(expected)
-
-
 @pytest.mark.parametrize('interval, item, expected', [
     (Interval(10), 5, True),
     (Interval(10), 11, False),

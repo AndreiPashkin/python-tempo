@@ -25,9 +25,6 @@ class Interval(object):
     >>> interval = Interval(5)
     >>> interval
     ... Interval(start=0.0, stop=5.0)
-    >>> list(interval)
-    ... [Decimal('0'), Decimal('1'), Decimal('2'), Decimal('3'), Decimal('4'),
-    ...  Decimal('5')]
     >>> 3 in interval
     ... True
     >>> 10 in interval
@@ -48,16 +45,6 @@ class Interval(object):
                            for k, v in iteritems(final_arguments)}
 
         self.__dict__.update(final_arguments)
-
-    def __iter__(self):
-        """Iteration over intervals values as 'decimal.Decimal'
-        instances.
-        """
-        current = self.start
-
-        while current <= self.stop:
-            yield current
-            current += 1
 
     def __contains__(self, item):
         """Containment test.
