@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 language: python
 install:
   - pip install tox==1.9.2
