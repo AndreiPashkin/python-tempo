@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 # coding=utf-8
+import random as rnd
 from datetime import datetime as dt
+from itertools import islice, chain
 
 import pytest
+from six.moves import range
 
 from tempo.interval import Interval
 from tempo.timeinterval import Unit as U, TimeInterval
+from tempo.timeutils import add_delta, delta, floor
+from tempo.unit import MIN, MAX, ONE_BASED_UNITS
+
+from tests.utils import randuniq, CASES
 
 
 @pytest.mark.parametrize('unit, recurrence, interval, datetime, expected', [
@@ -101,3 +108,123 @@ def test_eq_hash(first, second, expected):
 
     if expected:
         assert hash(first) == hash(second)
+
+
+@pytest.mark.parametrize('interval, unit, recurrence, start, expected', [
+    # Since week and months are not "synchronous", flooring by week
+    # might result a date with month earlier than in passed date.
+    # And it might cause invalid (earlier) "starts" in `forward()` results.
+    (Interval(1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
+     [(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
+      (dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
+])
+def test_forward_corner_cases(interval, unit, recurrence, start, expected):
+    """Corner cases for `forward()` method."""
+    timeinterval = TimeInterval(interval=interval, unit=unit,
+                                recurrence=recurrence)
+    actual = list(islice((e for e in timeinterval.forward(start)),
+                         len(expected)))
+
+    assert actual == expected
+
+
+N = 10
+
+
+@pytest.mark.parametrize('unit, overlap', chain.from_iterable([
+    [(unit, True), (unit, False)]
+    for unit, recurrence in CASES
+    if recurrence is None
+] * 10))
+def test_forward_non_recurrent_random(unit, overlap):
+    """`forward()` method of non-recurrent time intervals with and without
+    overlapping `start` date."""
+    if unit in ONE_BASED_UNITS:
+        correction = 1
+    else:
+        correction = 0
+
+    max_ = add_delta(MAX, -1 * N, unit)
+
+    unit_maximum = delta(MIN, max_, unit)
+
+    interval = Interval(*sorted(randuniq(2, correction, unit_maximum)))
+
+    if overlap:
+        start = add_delta(
+            MIN,
+            rnd.randrange(
+                int(interval.start), int(interval.stop)
+            ) - correction,
+            unit
+        )
+    else:
+        start = add_delta(MIN,
+                          int(interval.start) - correction,
+                          unit)
+
+    stop = add_delta(MIN, int(interval.stop) - correction + 1, unit)
+    expected = [(start, stop)]
+
+    timeinterval = TimeInterval(interval, unit, None)
+    actual = list(islice(timeinterval.forward(start), None, N))
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize('unit, recurrence, overlap', chain.from_iterable([
+    [(unit, recurrence, True), (unit, recurrence, False)]
+    for unit, recurrence in CASES
+    if recurrence is not None
+] * 10))
+def test_forward_recurrent_random(unit, recurrence, overlap):
+    """`forward()` method of recurrent time intervals with and without
+    overlapping `start` date."""
+    if unit in ONE_BASED_UNITS:
+        correction = 1
+    else:
+        correction = 0
+
+    max_ = add_delta(MAX, -1 * N, recurrence)
+
+    unit_maximum = delta(MIN, add_delta(MIN, 1, recurrence), unit)
+
+    interval = Interval(*sorted(randuniq(2, correction, unit_maximum)))
+
+    expected = []
+
+    initial = start = floor(
+        add_delta(MIN, rnd.randrange(delta(MIN, max_, unit)), unit),
+        recurrence
+    )
+
+    if overlap:
+        initial = start = add_delta(
+            initial,
+            rnd.randrange(
+                int(interval.start), int(interval.stop)
+            ) - correction,
+            unit
+        )
+
+    for i in range(N):
+        recurrence_start = floor(start, recurrence)
+        first = floor(add_delta(recurrence_start,
+                                interval.start - correction,
+                                unit), unit)
+        second = add_delta(floor(add_delta(recurrence_start,
+                                 interval.stop - correction,
+                                 unit),
+                            unit), 1, unit)
+        assert first < second
+        assert start < second
+        if start > first:
+            first = start
+
+        expected.append((first, second))
+        start = floor(add_delta(recurrence_start, 1, recurrence), recurrence)
+
+    timeinterval = TimeInterval(interval, unit, recurrence)
+    actual = list(islice(timeinterval.forward(initial), None, N))
+
+    assert actual == expected

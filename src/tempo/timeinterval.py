@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
-from tempo.timeutils import delta, floor
-from tempo.unit import Unit, UNIT_ORDER, MIN, MAX
+from tempo.timeutils import delta, floor, add_delta
+from tempo.unit import Unit, UNIT_ORDER, MIN, ONE_BASED_UNITS
 
 
 class TimeInterval(object):
@@ -112,3 +112,60 @@ class TimeInterval(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def forward(self, start):
+        """Iterate time intervals starting from 'start'.
+        Intervals returned in form of `(start, end)` pair,
+        where `start` is a datetime object representing the start
+        of the interval and `end` is the non-inclusive end of the interval.
+
+        Parameters
+        ----------
+        start : datetime.datetime
+            A lower bound for the resulting sequence of intervals.
+
+        Yields
+        ------
+        start : datetime.datetime
+            Start of an interval.
+        end : datetime.datetime
+            End of an interval.
+        """
+        if self.recurrence is None:
+            base = MIN
+        else:
+            base = floor(start, self.recurrence)
+
+        if self.unit in ONE_BASED_UNITS:
+            correction = -1
+        else:
+            correction = 0
+
+        def addfloor(base, delta):
+            """Adds 'delta' to 'base' and than floors it
+            by unit of this interval."""
+            return floor(add_delta(base, delta, self.unit), self.unit)
+
+        try:
+            first = addfloor(base, self.interval.start + correction)
+            second = addfloor(base, self.interval.stop + correction + 1)
+            if first < start < second:
+                yield (start, second)
+            elif start <= first:
+                yield (first, second)
+        except OverflowError:
+            return
+
+        if self.recurrence is None:
+            return
+        while True:
+            base = add_delta(base, 1, self.recurrence)
+            try:
+                first = addfloor(base, self.interval.start + correction)
+                second = addfloor(base, self.interval.stop + correction + 1)
+                if base > first:
+                    first = base
+
+                yield (first, second)
+            except OverflowError:
+                return

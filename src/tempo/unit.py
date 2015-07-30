@@ -36,6 +36,13 @@ class Unit:
     YEAR    = 'year'
 
 
+ONE_BASED_UNITS = {
+    Unit.DAY,
+    Unit.WEEK,
+    Unit.MONTH,
+    Unit.YEAR
+}
+
 # Order of places in time representation
 UNIT_ORDER = {
     Unit.SECOND: 1,
