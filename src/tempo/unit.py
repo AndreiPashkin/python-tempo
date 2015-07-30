@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 # coding=utf-8
+import datetime as dt
+
+
+MIN = dt.datetime(year=1, month=1, day=1)
+MAX = dt.datetime(year=9999, month=12, day=31,
+                  hour=23, minute=59, second=59)
+
+
 SECONDS_IN_MINUTE   = 60
 MINUTES_IN_HOUR     = 60
 SECONDS_IN_HOUR     = SECONDS_IN_MINUTE * MINUTES_IN_HOUR

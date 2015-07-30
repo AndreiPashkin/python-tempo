@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
-import datetime as dt
-
 from tempo.timeutils import delta, floor
-from tempo.unit import Unit, UNIT_ORDER
+from tempo.unit import Unit, UNIT_ORDER, MIN, MAX
 
 
 class TimeInterval(object):
@@ -40,8 +38,6 @@ class TimeInterval(object):
     >>> datetime(2000, 1, 1, 5, 3, 16) in timeinterval
     ... False
     """
-
-    MIN = dt.datetime(year=1, month=1, day=1)
 
     def __init__(self, interval, unit, recurrence=None):
         if recurrence is not None:
@@ -87,7 +83,7 @@ class TimeInterval(object):
             4. Resulting delta tested for containment in the interval.
         """
         if self.recurrence is None:
-            time_in_unit = delta(self.MIN, item, self.unit)
+            time_in_unit = delta(MIN, item, self.unit)
         else:
             time_in_unit = delta(floor(item, self.recurrence),
                                  floor(item, self.unit),
