@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # coding=utf-8
-import calendar
+from calendar import isleap, leapdays
 import datetime as dt
+from itertools import chain, islice
 import math
 
-from six.moves import range
 
 from tempo.unit import (Unit, SECONDS_IN_MINUTE, SECONDS_IN_HOUR,
                         SECONDS_IN_DAY, DAYS_IN_WEEK, DAYS_OF_COMMON_YEAR,
-                        DAYS_OF_LEAP_YEAR, MIN, MAX)
+                        DAYS_OF_LEAP_YEAR, MIN, MAX, MONTHS_IN_YEAR,
+                        DAYS_IN_COMMON_YEAR)
 
 
 def _floor_by_second(datetime):
@@ -120,6 +121,15 @@ def delta(datetime1, datetime2, unit):
         return datetime2.year - datetime1.year
 
 
+def _add_years(datetime, delta):
+    sign = int(math.copysign(1, delta))
+    days = (abs(delta) * DAYS_IN_COMMON_YEAR +
+            leapdays(*sorted((datetime.year, datetime.year + delta)))) * sign
+    _check_overflow(datetime, days=delta)
+
+    return datetime + dt.timedelta(days=int(math.copysign(days, delta)))
+
+
 def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
                     days=0):
     kwargs = {
@@ -186,33 +196,29 @@ def add_delta(datetime, delta, unit):
         _check_overflow(datetime, days=days)
         return datetime + dt.timedelta(days=days)
     elif unit == Unit.MONTH:
-        days = 0
-        while delta != 0:
-            start, end = sorted((datetime.month,
-                                 max(min(datetime.month + delta, 12), 1)))
+        sign = int(math.copysign(1, delta))
+        years = abs(delta) // MONTHS_IN_YEAR * sign
 
-            if calendar.isleap(datetime.year):
-                DAYS_OF_YEAR = DAYS_OF_LEAP_YEAR
-            else:
-                DAYS_OF_YEAR = DAYS_OF_COMMON_YEAR
+        if years > 0:
+            datetime = _add_years(datetime, years)
+            delta = (abs(delta) % MONTHS_IN_YEAR) * sign
 
-            days += int(math.copysign(sum(DAYS_OF_YEAR[start - 1:end - 1]),
-                                      delta))
-            delta -= int(math.copysign(end - start, delta))
+        matched_years = chain.from_iterable(
+            DAYS_OF_COMMON_YEAR
+            if not isleap(y)
+            else DAYS_OF_LEAP_YEAR
+            for y in (datetime.year - 1, datetime.year, datetime.year + 1)
+        )
+
+        month_index = datetime.month - 1 + MONTHS_IN_YEAR
+
+        days = sum(
+            islice(matched_years, *sorted((month_index, month_index + delta)))
+        ) * sign
 
         _check_overflow(datetime, days=days)
         return datetime + dt.timedelta(days=days)
     elif unit == Unit.YEAR:
-        days = 0
-        start, end = sorted((datetime.year, datetime.year + delta))
-        for year in range(start, end):
-            if calendar.isleap(year):
-                days += sum(DAYS_OF_LEAP_YEAR)
-            else:
-                days += sum(DAYS_OF_COMMON_YEAR)
-
-        days = int(math.copysign(days, delta))
-        _check_overflow(datetime, days=days)
-        return datetime + dt.timedelta(days=days)
+        return _add_years(datetime, delta)
     else:
         raise ValueError

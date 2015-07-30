@@ -27,6 +27,12 @@ from tempo.unit import Unit, MAX, MIN
     # Months
     (datetime(2015, 1, 1), 5, Unit.MONTH, datetime(2015, 6, 1)),
     (datetime(2015, 6, 1), -5, Unit.MONTH, datetime(2015, 1, 1)),
+    # Months -
+    (datetime(2015, 12, 1), 1, Unit.MONTH, datetime(2016, 1, 1)),
+    (datetime(2015, 12, 1), 5, Unit.MONTH, datetime(2016, 5, 1)),
+    (datetime(2015, 1, 1), -1, Unit.MONTH, datetime(2014, 12, 1)),
+    (datetime(2015, 1, 1), -5, Unit.MONTH, datetime(2014, 8, 1)),
+    (datetime(2000, 1, 1), 5, Unit.MONTH, datetime(2000, 6,  1)),
     # Years
     (datetime(2015, 1, 1), 5, Unit.YEAR, datetime(2020, 1, 1)),
     (datetime(2020, 1, 1), -5, Unit.YEAR, datetime(2015, 1, 1)),
