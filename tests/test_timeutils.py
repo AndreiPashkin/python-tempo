@@ -49,3 +49,8 @@ def test_add_delta_raises_overflow_exception(unit):
 
     with pytest.raises(OverflowError):
         add_delta(MIN, -1, unit)
+
+
+def test_add_delta_raises_value_error_on_wrong_unit():
+    with pytest.raises(ValueError):
+        add_delta(MIN, -1, 'wrong_unit')

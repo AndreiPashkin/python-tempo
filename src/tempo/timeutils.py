@@ -155,6 +155,9 @@ def add_delta(datetime, delta, unit):
         Datetime, in a result of delta addition becomes
         greater than 'tempo.unit.MAX' or lesser than 'tempo.unit.MAX'.
 
+    ValueError
+        Improper 'unit' passed.
+
     Returns
     -------
     datetime.datetime
