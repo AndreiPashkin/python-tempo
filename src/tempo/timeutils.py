@@ -8,7 +8,7 @@ from six.moves import range
 
 from tempo.unit import (Unit, SECONDS_IN_MINUTE, SECONDS_IN_HOUR,
                         SECONDS_IN_DAY, DAYS_IN_WEEK, DAYS_OF_COMMON_YEAR,
-                        DAYS_OF_LEAP_YEAR)
+                        DAYS_OF_LEAP_YEAR, MIN, MAX)
 
 
 def _floor_by_second(datetime):
@@ -120,6 +120,23 @@ def delta(datetime1, datetime2, unit):
         return datetime2.year - datetime1.year
 
 
+def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
+                    days=0):
+    kwargs = {
+        'seconds': seconds,
+        'minutes': minutes,
+        'hours': hours,
+        'days': days
+    }
+    delta = dt.timedelta(**kwargs)
+    total_seconds = delta.total_seconds()
+
+    if (total_seconds > 0) and (datetime > (MAX - abs(delta))):
+        raise OverflowError
+    elif (total_seconds < 0) and (datetime < (MIN + abs(delta))):
+        raise OverflowError
+
+
 def add_delta(datetime, delta, unit):
     """Adds a 'delta' expressed in 'unit' to given 'datetime'.
 
@@ -131,6 +148,12 @@ def add_delta(datetime, delta, unit):
         Delta to add.
     unit : str
         Units of delta.
+
+    Raises
+    ------
+    OverflowError
+        Datetime, in a result of delta addition becomes
+        greater than 'tempo.unit.MAX' or lesser than 'tempo.unit.MAX'.
 
     Returns
     -------
@@ -144,15 +167,21 @@ def add_delta(datetime, delta, unit):
     ... datetime(2000, 10, 15, 0, 0)
     """
     if unit == Unit.SECOND:
+        _check_overflow(datetime, seconds=delta)
         return datetime + dt.timedelta(seconds=delta)
     elif unit == Unit.MINUTE:
+        _check_overflow(datetime, minutes=delta)
         return datetime + dt.timedelta(minutes=delta)
     elif unit == Unit.HOUR:
+        _check_overflow(datetime, hours=delta)
         return datetime + dt.timedelta(hours=delta)
     elif unit == Unit.DAY:
+        _check_overflow(datetime, days=delta)
         return datetime + dt.timedelta(days=delta)
     elif unit == Unit.WEEK:
-        return datetime + dt.timedelta(days=DAYS_IN_WEEK * delta)
+        days = DAYS_IN_WEEK * delta
+        _check_overflow(datetime, days=days)
+        return datetime + dt.timedelta(days=days)
     elif unit == Unit.MONTH:
         days = 0
         while delta != 0:
@@ -168,6 +197,7 @@ def add_delta(datetime, delta, unit):
                                       delta))
             delta -= int(math.copysign(end - start, delta))
 
+        _check_overflow(datetime, days=days)
         return datetime + dt.timedelta(days=days)
     elif unit == Unit.YEAR:
         days = 0
@@ -178,6 +208,8 @@ def add_delta(datetime, delta, unit):
             else:
                 days += sum(DAYS_OF_COMMON_YEAR)
 
-        return datetime + dt.timedelta(days=int(math.copysign(days, delta)))
+        days = int(math.copysign(days, delta))
+        _check_overflow(datetime, days=days)
+        return datetime + dt.timedelta(days=days)
     else:
         raise ValueError

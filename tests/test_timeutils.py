@@ -5,7 +5,7 @@ from datetime import datetime
 import pytest
 from tempo.timeutils import add_delta
 
-from tempo.unit import Unit
+from tempo.unit import Unit, MAX, MIN
 
 
 @pytest.mark.parametrize('datetime, delta, unit, expected', [
@@ -34,3 +34,18 @@ from tempo.unit import Unit
 def test_add_delta(datetime, delta, unit, expected):
     """Cases for `add_delta`."""
     assert add_delta(datetime, delta, unit) == expected
+
+
+@pytest.mark.parametrize('unit', [
+    Unit.SECOND, Unit.MINUTE, Unit.HOUR, Unit.DAY, Unit.WEEK,
+    Unit.DAY, Unit.MONTH, Unit.YEAR
+])
+def test_add_delta_raises_overflow_exception(unit):
+    """'add_delta' raises `OverflowError` in case if resulting
+    datetime is greater than `tempo.unit.MAX` or
+    lesser than `tempo.unit.MIN`"""
+    with pytest.raises(OverflowError):
+        add_delta(MAX, 1, unit)
+
+    with pytest.raises(OverflowError):
+        add_delta(MIN, -1, unit)
