@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # coding=utf-8
-from decimal import Decimal
-
-from six import iteritems
 from funclib.utils import resolve_args
 
 
@@ -41,8 +38,6 @@ class Interval(object):
 
         final_arguments = self._DEFAULTS.copy()
         final_arguments.update(arguments._asdict())
-        final_arguments = {k: Decimal(str(v))
-                           for k, v in iteritems(final_arguments)}
 
         self.__dict__.update(final_arguments)
 
