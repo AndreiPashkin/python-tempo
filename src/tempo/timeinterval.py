@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
-from collections import Iterable
+import datetime as dt
 
-from tempo.interval import Interval
+from tempo.interval import Interval, EmptyInterval
 from tempo.timeutils import delta, floor, add_delta
 from tempo.unit import Unit, ORDER, MIN, BASE
 
@@ -85,10 +85,16 @@ class TimeInterval(object):
 
             4. Resulting delta tested for containment in the interval.
         """
-        if not isinstance(item, Iterable):
+        if isinstance(item, dt.datetime):
             item = (item,)
+        elif isinstance(item, (tuple, list)):
+            assert len(item) == 2
+        elif isinstance(item, Interval):
+            item = (item.start, item.stop)
+        elif isinstance(item, EmptyInterval):
+            return True
         else:
-            item = tuple(item)
+            raise AssertionError
 
         if self.recurrence is None:
             time_in_unit = [delta(MIN, e, self.unit) for e in item]
@@ -158,9 +164,9 @@ class TimeInterval(object):
             first = addfloor(base, self.interval.start + correction)
             second = addfloor(base, self.interval.stop + correction + 1)
             if first < start < second:
-                yield (start, second)
+                yield Interval(start, second)
             elif start <= first:
-                yield (first, second)
+                yield Interval(first, second)
         except OverflowError:
             return
 
@@ -173,6 +179,6 @@ class TimeInterval(object):
                 second = addfloor(base, self.interval.stop + correction + 1)
                 if base > first:  # In case if flooring by week resulted
                     first = base  # as a time earlier than 'base'
-                yield (first, second)
+                yield Interval(first, second)
             except OverflowError:
                 return

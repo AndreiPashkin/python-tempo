@@ -162,8 +162,8 @@ def test_eq_hash(first, second, expected):
     # might result a date with month earlier than in passed date.
     # And it might cause invalid (earlier) "starts" in `forward()` results.
     (Interval(1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
-     [(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
-      (dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
+     [Interval(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
+      Interval(dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
 ])
 def test_forward_corner_cases(interval, unit, recurrence, start, expected):
     """Corner cases for `forward()` method."""
@@ -208,7 +208,7 @@ def test_forward_non_recurrent_random(unit, overlap):
                           unit)
 
     stop = add_delta(MIN, int(interval.stop) - correction + 1, unit)
-    expected = [(start, stop)]
+    expected = [Interval(start, stop)]
 
     timeinterval = TimeInterval(interval, unit, None)
     actual = list(islice(timeinterval.forward(start), None, N))
@@ -262,7 +262,7 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
         if start > first:
             first = start
 
-        expected.append((first, second))
+        expected.append(Interval(first, second))
         start = floor(add_delta(recurrence_start, 1, recurrence), recurrence)
 
     timeinterval = TimeInterval(interval, unit, recurrence)
