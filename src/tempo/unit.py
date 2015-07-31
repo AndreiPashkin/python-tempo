@@ -36,13 +36,6 @@ class Unit:
     YEAR    = 'year'
 
 
-ONE_BASED = {
-    Unit.DAY,
-    Unit.WEEK,
-    Unit.MONTH,
-    Unit.YEAR
-}
-
 # Order of places in time representation
 ORDER = {
     Unit.SECOND: 1,
@@ -52,4 +45,14 @@ ORDER = {
     Unit.WEEK  : 5,
     Unit.MONTH : 6,
     Unit.YEAR  : 7
+}
+
+BASE = {
+    Unit.SECOND: 0,
+    Unit.MINUTE: 0,
+    Unit.HOUR  : 0,
+    Unit.DAY   : 1,
+    Unit.WEEK  : 1,
+    Unit.MONTH : 1,
+    Unit.YEAR  : 1
 }

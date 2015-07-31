@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 from tempo.timeutils import delta, floor, add_delta
-from tempo.unit import Unit, ORDER, MIN, ONE_BASED
+from tempo.unit import Unit, ORDER, MIN, BASE
 
 
 class TimeInterval(object):
@@ -136,10 +136,7 @@ class TimeInterval(object):
         else:
             base = floor(start, self.recurrence)
 
-        if self.unit in ONE_BASED:
-            correction = -1
-        else:
-            correction = 0
+        correction = -1 * BASE[self.unit]
 
         def addfloor(base, delta):
             """Adds 'delta' to 'base' and than floors it

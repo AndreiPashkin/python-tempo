@@ -10,7 +10,7 @@ from six.moves import range
 from tempo.interval import Interval
 from tempo.timeinterval import Unit as U, TimeInterval
 from tempo.timeutils import add_delta, delta, floor
-from tempo.unit import MIN, MAX, ONE_BASED
+from tempo.unit import MIN, MAX, BASE
 
 from tests.utils import randuniq, CASES
 
@@ -139,10 +139,7 @@ N = 10
 def test_forward_non_recurrent_random(unit, overlap):
     """`forward()` method of non-recurrent time intervals with and without
     overlapping `start` date."""
-    if unit in ONE_BASED:
-        correction = 1
-    else:
-        correction = 0
+    correction = BASE[unit]
 
     max_ = add_delta(MAX, -1 * N, unit)
 
@@ -180,10 +177,7 @@ def test_forward_non_recurrent_random(unit, overlap):
 def test_forward_recurrent_random(unit, recurrence, overlap):
     """`forward()` method of recurrent time intervals with and without
     overlapping `start` date."""
-    if unit in ONE_BASED:
-        correction = 1
-    else:
-        correction = 0
+    correction = BASE[unit]
 
     max_ = add_delta(MAX, -1 * N, recurrence)
 
