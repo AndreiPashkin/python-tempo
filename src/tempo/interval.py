@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding=utf-8
-from funclib.utils import resolve_args
 
 
 class Interval(object):
@@ -27,22 +26,16 @@ class Interval(object):
     >>> 10 in interval
     ... False
     """
-    _DEFAULTS = {'start': 0}
 
     __slots__ = ('start', 'stop')
 
     def __init__(self, *args, **kwargs):
         try:
-            arguments = resolve_args(['stop'], args, kwargs)
-        except TypeError:
-            arguments = resolve_args(['start', 'stop'], args, kwargs,
-                                     self._DEFAULTS)
-
-        final = self._DEFAULTS.copy()
-        final.update(arguments._asdict())
-
-        self.start, self.stop = final['start'], final['stop']
-        assert self.start <= self.stop
+            self.stop = kwargs.get('stop', args[1])
+            self.start = kwargs.get('start', args[0])
+        except IndexError:
+            self.start = 0
+            self.stop = kwargs.get('start', args[0])
 
     def __str__(self):
         return ('Interval(start={start}, stop={stop})'
