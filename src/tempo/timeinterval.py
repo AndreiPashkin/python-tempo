@@ -146,6 +146,7 @@ class TimeInterval(object):
             by unit of this interval."""
             return floor(add_delta(base, delta, self.unit), self.unit)
 
+        # Handle possible overlap in first interval
         try:
             first = addfloor(base, self.interval.start + correction)
             second = addfloor(base, self.interval.stop + correction + 1)
@@ -158,14 +159,13 @@ class TimeInterval(object):
 
         if self.recurrence is None:
             return
-        while True:
+        while True:  # Handle recurring intervals
             base = add_delta(base, 1, self.recurrence)
             try:
                 first = addfloor(base, self.interval.start + correction)
                 second = addfloor(base, self.interval.stop + correction + 1)
-                if base > first:
-                    first = base
-
+                if base > first:  # In case if flooring by week resulted
+                    first = base  # as a time earlier than 'base'
                 yield (first, second)
             except OverflowError:
                 return
