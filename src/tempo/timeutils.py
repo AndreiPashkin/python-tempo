@@ -101,7 +101,7 @@ def _add_years(datetime, delta):
             leapdays(*sorted((datetime.year, datetime.year + delta)))) * sign
     _check_overflow(datetime, days=delta)
 
-    return datetime + dt.timedelta(days=int(math.copysign(days, delta)))
+    return datetime + dt.timedelta(days=days)
 
 
 def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
