@@ -41,6 +41,17 @@ class Interval(object):
 
         self.__dict__.update(final_arguments)
 
+    def __str__(self):
+        return ('Interval(start={start}, stop={stop})'
+                .format(start=repr(float(self.start)),
+                        stop=repr(float(self.stop))))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash((self.start, self.stop))
+
     def __contains__(self, item):
         """Containment test.
 
@@ -55,17 +66,6 @@ class Interval(object):
         """
         return self.start <= item <= self.stop
 
-    def __str__(self):
-        return ('Interval(start={start}, stop={stop})'
-                .format(start=repr(float(self.start)),
-                        stop=repr(float(self.stop))))
-
-    def __repr__(self):
-        return self.__str__()
-
     def __eq__(self, other):
         return (self.start == other.start and
                 self.stop == other.stop)
-
-    def __hash__(self):
-        return hash((self.start, self.stop))
