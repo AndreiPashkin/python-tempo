@@ -106,13 +106,8 @@ def _add_years(datetime, delta):
 
 def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
                     days=0):
-    kwargs = {
-        'seconds': seconds,
-        'minutes': minutes,
-        'hours': hours,
-        'days': days
-    }
-    delta = dt.timedelta(**kwargs)
+    delta = dt.timedelta(seconds=seconds, minutes=minutes, hours=hours,
+                         days=days)
     total_seconds = delta.total_seconds()
 
     if (total_seconds > 0) and (datetime > (MAX - abs(delta))):
