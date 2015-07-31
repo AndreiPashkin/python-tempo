@@ -29,6 +29,8 @@ class Interval(object):
     """
     _DEFAULTS = {'start': 0}
 
+    __slots__ = ('start', 'stop')
+
     def __init__(self, *args, **kwargs):
         try:
             arguments = resolve_args(['stop'], args, kwargs)
@@ -36,10 +38,10 @@ class Interval(object):
             arguments = resolve_args(['start', 'stop'], args, kwargs,
                                      self._DEFAULTS)
 
-        final_arguments = self._DEFAULTS.copy()
-        final_arguments.update(arguments._asdict())
+        final = self._DEFAULTS.copy()
+        final.update(arguments._asdict())
 
-        self.__dict__.update(final_arguments)
+        self.start, self.stop = final['start'], final['stop']
         assert self.start <= self.stop
 
     def __str__(self):
