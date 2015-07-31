@@ -116,8 +116,7 @@ class TimeInterval(object):
         return hash((self.interval, self.unit, self.recurrence))
 
     def __str__(self):
-        return ('TimeInterval(interval={interval}, unit={unit}, '
-                'recurrence={recurrence})'
+        return ('TimeInterval({interval}, {unit}, {recurrence})'
                 .format(interval=repr(self.interval), unit=repr(self.unit),
                         recurrence=repr(self.recurrence)))
 
