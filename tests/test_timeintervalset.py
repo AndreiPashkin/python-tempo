@@ -1,7 +1,10 @@
 # coding=utf-8
 import pytest
 
-from tempo.timeintervalset import AND, NOT, OR, _walk
+from tempo.interval import Interval
+from tempo.timeinterval import TimeInterval
+
+from tempo.timeintervalset import AND, NOT, OR, _walk, TimeIntervalSet
 
 
 def callback(op, *args):
@@ -36,3 +39,31 @@ def callback(op, *args):
 def test_walk(expression, callback, expected):
     """Cases for expression evaluator - '_walk' function."""
     assert _walk(expression, callback) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (TimeIntervalSet((AND, [
+        TimeInterval(Interval(0, 5), 'hour', 'day'),
+        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
+     ])),
+     TimeIntervalSet((AND, [
+        TimeInterval(Interval(0, 5), 'hour', 'day'),
+        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
+     ])),
+     True),
+    (TimeIntervalSet((AND, [
+        TimeInterval(Interval(0, 5), 'hour', 'day'),
+        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
+     ])),
+     TimeIntervalSet((AND, [
+        TimeInterval(Interval(0, 5), 'hour', 'day'),
+        (NOT, [TimeInterval(Interval(2, 4), 'hour', 'day')])
+     ])),
+     False),
+])
+def test_eq_hash(first, second, expected):
+    """Cases for equality test and hashing."""
+    assert (first == second) == expected
+
+    if expected:
+        assert hash(first) == hash(second)

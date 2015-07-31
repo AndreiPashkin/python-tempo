@@ -126,3 +126,29 @@ class TimeIntervalSet(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def __eq__(self, other):
+        sample_self = []
+        sample_other = []
+
+        def callback(sample, op, *args):
+            sample.append(op)
+            sample.extend(args)
+
+        _walk(self.expression,
+             lambda op, *args: callback(sample_self, op, *args))
+        _walk(other.expression,
+             lambda op, *args: callback(sample_other, op, *args))
+
+        return tuple(sample_self) == tuple(sample_other)
+
+    def __hash__(self):
+        sample = []
+
+        def callback(op, *args):
+            sample.append(op)
+            sample.extend(args)
+
+        _walk(self.expression, callback)
+
+        return hash(tuple(sample))
