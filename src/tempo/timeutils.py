@@ -221,4 +221,4 @@ def add_delta(datetime, delta, unit):
     elif unit == Unit.YEAR:
         return _add_years(datetime, delta)
     else:
-        raise ValueError
+        raise ValueError('Unsupported unit', unit)
