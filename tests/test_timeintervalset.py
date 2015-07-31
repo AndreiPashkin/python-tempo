@@ -4,7 +4,8 @@ import pytest
 from tempo.interval import Interval
 from tempo.timeinterval import TimeInterval
 
-from tempo.timeintervalset import AND, NOT, OR, _walk, TimeIntervalSet
+from tempo.timeintervalset import (AND, NOT, OR, _walk, TimeIntervalSet, Omit,
+                                   EmptyResult)
 
 
 def callback(op, *args):
@@ -39,6 +40,17 @@ def callback(op, *args):
 def test_walk(expression, callback, expected):
     """Cases for expression evaluator - '_walk' function."""
     assert _walk(expression, callback) == expected
+
+
+def test_walk_raises_empty_result():
+    """If result of evaluation is empty, EmptyResult is raised."""
+    expression = (OR, [True, False])
+
+    def callback(*_):
+        raise Omit
+
+    with pytest.raises(EmptyResult):
+        _walk(expression, callback)
 
 
 @pytest.mark.parametrize('first, second, expected', [

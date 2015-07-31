@@ -10,6 +10,14 @@ OR  = 'OR'
 _OPS = {NOT, AND, OR}
 
 
+class Omit(Exception):
+    pass
+
+
+class EmptyResult(Exception):
+    pass
+
+
 def _evaluate(result_stack, callback):
     """Evaluates topmost operator in 'result_stack' and appends
     the result of evaluation back.
@@ -29,7 +37,10 @@ def _evaluate(result_stack, callback):
             if e == NOT:
                 assert len(frame) == 2
             break
-    result_stack.append(callback(*frame))
+    try:
+        result_stack.append(callback(*frame))
+    except Omit:
+        pass
 
 
 def _walk(expression, callback):
@@ -65,6 +76,8 @@ def _walk(expression, callback):
         `args` may be an "atomic" objects, that were included in the
         expression, or anything that the callback returned as a result
         of evaluation of previous expressions.
+        A callback can raise Omit exception to omit storing a returned
+        value.
 
     Returns
     -------
@@ -81,9 +94,8 @@ def _walk(expression, callback):
         while True:
             if not (len(current) > 0):
                 del stack[-1]
-                if len(result_stack) == 1 and result_stack[0] not in _OPS:
-                    break
-                _evaluate(result_stack, callback)
+                if len(result_stack) > 0 and result_stack[0] in _OPS:
+                    _evaluate(result_stack, callback)
                 break
 
             e = current.popleft()
@@ -94,8 +106,10 @@ def _walk(expression, callback):
                 break
             else:
                 result_stack.append(e)
-
-    return result_stack.pop()
+    try:
+        return result_stack.pop()
+    except IndexError:
+        raise EmptyResult
 
 
 class TimeIntervalSet(object):
@@ -134,11 +148,19 @@ class TimeIntervalSet(object):
         def callback(sample, op, *args):
             sample.append(op)
             sample.extend(args)
+            raise Omit
 
-        _walk(self.expression,
-             lambda op, *args: callback(sample_self, op, *args))
-        _walk(other.expression,
-             lambda op, *args: callback(sample_other, op, *args))
+        try:
+            _walk(self.expression,
+                 lambda op, *args: callback(sample_self, op, *args))
+        except EmptyResult:
+            pass
+
+        try:
+            _walk(other.expression,
+                 lambda op, *args: callback(sample_other, op, *args))
+        except EmptyResult:
+            pass
 
         return tuple(sample_self) == tuple(sample_other)
 
@@ -148,7 +170,11 @@ class TimeIntervalSet(object):
         def callback(op, *args):
             sample.append(op)
             sample.extend(args)
+            raise Omit
 
-        _walk(self.expression, callback)
+        try:
+            _walk(self.expression, callback)
+        except EmptyResult:
+            pass
 
         return hash(tuple(sample))
