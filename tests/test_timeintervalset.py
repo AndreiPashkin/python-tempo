@@ -1,4 +1,6 @@
 # coding=utf-8
+from datetime import datetime
+
 import pytest
 
 from tempo.interval import Interval
@@ -79,3 +81,26 @@ def test_eq_hash(first, second, expected):
 
     if expected:
         assert hash(first) == hash(second)
+
+
+@pytest.mark.parametrize('item, expression, expected', [
+    (datetime(2005, 5, 15),
+     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     True),
+    (datetime(2005, 12, 15),
+     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     False),
+    (datetime(2005, 5, 15),
+     (AND, [TimeInterval(Interval(2, 8), 'month', 'year'),
+            (NOT, [TimeInterval(Interval(4, 5), 'month', 'year')])]),
+     False),
+    ((datetime(2005, 4, 15), datetime(2005, 6, 15)),
+     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     True),
+    ((datetime(2005, 1, 15), datetime(2005, 12, 15)),
+     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     False),
+])
+def test_contains(item, expression, expected):
+    """Cases for containment test."""
+    assert (item in TimeIntervalSet(expression)) == expected

@@ -178,3 +178,24 @@ class TimeIntervalSet(object):
             pass
 
         return hash(tuple(sample))
+
+    def __contains__(self, item):
+        """Containment test. Accepts whatever TimeInterval can
+        test for containment.
+        """
+        def callback(op, *args):
+            contains = []
+            for arg in args:
+                if isinstance(arg, bool):
+                    contains.append(arg)
+                else:
+                    contains.append(item in arg)
+
+            if op == AND:
+                return all(contains)
+            elif op == OR:
+                return any(contains)
+            elif op == NOT:
+                return not contains[0]
+
+        return _walk(self.expression, callback)
