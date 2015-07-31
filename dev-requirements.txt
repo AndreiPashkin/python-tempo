@@ -1,2 +1,2 @@
 ipython==3.1.0
-ipdb==0.8
+pdbpp==0.8.2
