@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 from tempo.timeutils import delta, floor, add_delta
-from tempo.unit import Unit, UNIT_ORDER, MIN, ONE_BASED_UNITS
+from tempo.unit import Unit, ORDER, MIN, ONE_BASED
 
 
 class TimeInterval(object):
@@ -41,7 +41,7 @@ class TimeInterval(object):
 
     def __init__(self, interval, unit, recurrence=None):
         if recurrence is not None:
-            assert UNIT_ORDER[unit] < UNIT_ORDER[recurrence], (
+            assert ORDER[unit] < ORDER[recurrence], (
                 '"{unit} of {recurrence}" is impossible combination.'
                 .format(unit=unit, recurrence=recurrence)
             )
@@ -136,7 +136,7 @@ class TimeInterval(object):
         else:
             base = floor(start, self.recurrence)
 
-        if self.unit in ONE_BASED_UNITS:
+        if self.unit in ONE_BASED:
             correction = -1
         else:
             correction = 0

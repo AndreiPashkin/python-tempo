@@ -1,7 +1,7 @@
 # coding=utf-8
 import random as rnd
 
-from tempo.unit import Unit, UNIT_ORDER
+from tempo.unit import Unit, ORDER
 
 from itertools import permutations
 
@@ -36,5 +36,5 @@ CASES = [
     permutations([None, Unit.YEAR, Unit.MONTH, Unit.WEEK,
                   Unit.DAY, Unit.HOUR, Unit.MINUTE, Unit.SECOND], 2)
     if unit is not None and
-       (recurrence is None or UNIT_ORDER[unit] < UNIT_ORDER[recurrence])
+       (recurrence is None or ORDER[unit] < ORDER[recurrence])
 ]
