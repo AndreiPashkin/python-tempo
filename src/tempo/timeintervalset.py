@@ -96,3 +96,33 @@ def _walk(expression, callback):
                 result_stack.append(e)
 
     return result_stack.pop()
+
+
+class TimeIntervalSet(object):
+    """A set of time intervals, combined with a set logic operators:
+    AND, OR and NOT.
+
+    Parameters
+    ----------
+    expression : tuple
+        A nested expression, composed of operators and arguments, which
+        are `TimeInterval` instances or sub-expressions.
+        Example of an expression::
+
+            (AND, [
+                TimeInterval(Interval(10, 19), 'hour', 'day'),
+                (NOT, [TimeInterval(Interval(14, 15), 'hour', 'day')]),
+                (NOT, [TimeInterval(Interval(6, 7), 'day', 'week')]),
+            ])
+
+        It means: 'From 10:00 to 19:00 every day, except from
+        14:00 to 15:00, and weekends'.
+    """
+    def __init__(self, expression):
+        self.expression = expression
+
+    def __str__(self):
+        return 'TimeIntervalSet({})'.format(repr(self.expression))
+
+    def __repr__(self):
+        return self.__str__()
