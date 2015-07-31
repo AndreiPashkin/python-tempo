@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
+from collections import Iterable
+
+from tempo.interval import Interval
 from tempo.timeutils import delta, floor, add_delta
 from tempo.unit import Unit, ORDER, MIN, BASE
 
@@ -82,19 +85,27 @@ class TimeInterval(object):
 
             4. Resulting delta tested for containment in the interval.
         """
-        if self.recurrence is None:
-            time_in_unit = delta(MIN, item, self.unit)
+        if not isinstance(item, Iterable):
+            item = (item,)
         else:
-            time_in_unit = delta(floor(item, self.recurrence),
-                                 floor(item, self.unit),
-                                 self.unit)
+            item = tuple(item)
+
+        if self.recurrence is None:
+            time_in_unit = [delta(MIN, e, self.unit) for e in item]
+        else:
+            time_in_unit = [delta(floor(e, self.recurrence),
+                                  floor(e, self.unit), self.unit)
+                            for e in item]
 
         # Because we need to count not only time
         # that already happened, but also time, expressed in 'unit'
         # that "happening"
-        time_in_unit += 1
+        time_in_unit = [n + 1 for n in time_in_unit]
 
-        return time_in_unit in self.interval
+        if len(item) == 1:
+            return time_in_unit[0] in self.interval
+        elif len(item) == 2:
+            return Interval(*time_in_unit) <= self.interval
 
     def __eq__(self, other):
         return (self.interval == other.interval and

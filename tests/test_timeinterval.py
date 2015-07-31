@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 import random as rnd
-from datetime import datetime as dt
+from datetime import datetime as dt, timedelta
 from itertools import islice, chain
 
 import pytest
@@ -12,7 +12,7 @@ from tempo.timeinterval import Unit as U, TimeInterval
 from tempo.timeutils import add_delta, delta, floor
 from tempo.unit import MIN, MAX, BASE
 
-from tests.utils import randuniq, CASES
+from tests.utils import randuniq, CASES, unit_span, guess, sample
 
 
 @pytest.mark.parametrize('unit, recurrence, interval, datetime, expected', [
@@ -94,6 +94,53 @@ def test_containment(unit, recurrence, interval, datetime, expected):
     timeinterval = TimeInterval(Interval(*interval), unit, recurrence)
 
     assert (datetime in timeinterval) == expected
+
+
+@pytest.mark.parametrize('unit, recurrence, sample', [
+    (unit, recurrence, sample(recurrence
+                              if recurrence is not None
+                              else unit))
+    for unit, recurrence in CASES
+] * 10)
+@pytest.mark.parametrize('inclusion, expected', [
+    ('included', True),
+    ('not_included', False)
+])
+def test_interval_containment(unit, recurrence, sample, inclusion, expected):
+    """Cases for containment test of an dates intervals."""
+    correction = BASE[unit]
+
+    lower, upper = unit_span(unit, recurrence, sample
+                                               if recurrence is not None
+                                               else None)
+    if inclusion == 'included':
+        test = lambda outer_start, outer_stop, inner_start, inner_stop: (
+            lower <=
+            outer_start <= inner_start <= inner_stop < outer_stop <
+            upper
+        )
+    elif inclusion == 'not_included':
+        test = lambda outer_start, outer_stop, inner_start, inner_stop: (
+            lower <=
+            inner_start < outer_start <= outer_stop < inner_stop <
+            upper
+        )
+    else:
+        raise NotImplementedError
+
+    outer_start, outer_stop, inner_start, inner_stop = guess(lower, upper,
+                                                             4, test)
+
+    timeinterval = TimeInterval(Interval(outer_start, outer_stop),
+                                unit, recurrence)
+    if recurrence is not None:
+        first = add_delta(sample, inner_start - correction, unit)
+        second = add_delta(sample, inner_stop - correction, unit)
+    else:
+        first = add_delta(MIN, inner_start - correction, unit)
+        second = add_delta(MIN, inner_stop - correction, unit)
+
+    assert ((first, second) in timeinterval) == expected
 
 
 @pytest.mark.parametrize('first, second, expected', [
