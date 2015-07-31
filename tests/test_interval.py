@@ -34,3 +34,49 @@ def test_eq_hash(first, second, expected):
 
     if expected:
         assert hash(first) == hash(second)
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Interval(1, 10), Interval(4, 6), True),
+    (Interval(4, 6), Interval(1, 10), False),
+    (Interval(5, 15), Interval(1, 10), False),
+])
+def test_gt(first, second, expected):
+    """Is included test."""
+    assert (first > second) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Interval(1, 10), Interval(4, 6), True),
+    (Interval(1, 10), Interval(1, 10), True),
+    (Interval(1, 10), Interval(1, 5), True),
+    (Interval(1, 10), Interval(5, 10), True),
+    (Interval(4, 6), Interval(1, 10), False),
+    (Interval(5, 15), Interval(1, 10), False),
+])
+def test_ge(first, second, expected):
+    """Is included-or-equal test."""
+    assert (first >= second) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Interval(4, 6), Interval(1, 10), True),
+    (Interval(1, 10), Interval(4, 6), False),
+    (Interval(1, 10), Interval(5, 15), False),
+])
+def test_lt(first, second, expected):
+    """Reverse included test."""
+    assert (first < second) == expected
+
+
+@pytest.mark.parametrize('first, second, expected', [
+    (Interval(4, 6), Interval(1, 10), True),
+    (Interval(4, 6), Interval(4, 6), True),
+    (Interval(1, 5), Interval(1, 10), True),
+    (Interval(5, 10), Interval(1, 10), True),
+    (Interval(1, 10), Interval(4, 6), False),
+    (Interval(1, 10), Interval(5, 15), False),
+])
+def test_le(first, second, expected):
+    """Reverse included-or-equal test."""
+    assert (first <= second) == expected

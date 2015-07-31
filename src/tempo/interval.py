@@ -40,6 +40,7 @@ class Interval(object):
         final_arguments.update(arguments._asdict())
 
         self.__dict__.update(final_arguments)
+        assert self.start <= self.stop
 
     def __str__(self):
         return ('Interval(start={start}, stop={stop})'
@@ -69,3 +70,15 @@ class Interval(object):
     def __eq__(self, other):
         return (self.start == other.start and
                 self.stop == other.stop)
+
+    def __gt__(self, other):
+        return self.start < other.start and self.stop > other.stop
+
+    def __ge__(self, other):
+        return self.start <= other.start and self.stop >= other.stop
+
+    def __lt__(self, other):
+        return self.start > other.start and self.stop < other.stop
+
+    def __le__(self, other):
+        return self.start >= other.start and self.stop <= other.stop
