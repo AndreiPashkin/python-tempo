@@ -46,8 +46,8 @@ class Interval(object):
 
     def __str__(self):
         return ('Interval(start={start}, stop={stop})'
-                .format(start=repr(float(self.start)),
-                        stop=repr(float(self.stop))))
+                .format(start=repr(self.start),
+                        stop=repr(self.stop)))
 
     def __repr__(self):
         return self.__str__()
