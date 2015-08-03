@@ -1,7 +1,7 @@
 sudo: false
 language: python
 install:
-  - pip install tox==1.9.2
+  - pip install tox==1.9.2 coveralls
 env:
   - TOX_ENV=py27
   - TOX_ENV=py3
@@ -10,3 +10,5 @@ env:
   - TOX_ENV=py34
 script:
   - tox -e $TOX_ENV -v
+after_success:
+  coveralls
