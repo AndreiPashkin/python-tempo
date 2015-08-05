@@ -10,11 +10,7 @@ OR  = 'OR'
 _OPS = {NOT, AND, OR}
 
 
-class Omit(Exception):
-    pass
-
-
-class EmptyResult(Exception):
+class Void(Exception):
     pass
 
 
@@ -39,7 +35,7 @@ def _evaluate(result_stack, callback):
             break
     try:
         result_stack.append(callback(*frame))
-    except Omit:
+    except Void:
         pass
 
 
@@ -76,7 +72,7 @@ def _walk(expression, callback):
         `args` may be an "atomic" objects, that were included in the
         expression, or anything that the callback returned as a result
         of evaluation of previous expressions.
-        A callback can raise Omit exception to omit storing a returned
+        A callback can raise Void exception to omit storing a returned
         value.
 
     Returns
@@ -109,7 +105,7 @@ def _walk(expression, callback):
     try:
         return result_stack.pop()
     except IndexError:
-        raise EmptyResult
+        raise Void
 
 
 class TimeIntervalSet(object):
@@ -148,18 +144,18 @@ class TimeIntervalSet(object):
         def callback(sample, op, *args):
             sample.append(op)
             sample.extend(args)
-            raise Omit
+            raise Void
 
         try:
             _walk(self.expression,
                  lambda op, *args: callback(sample_self, op, *args))
-        except EmptyResult:
+        except Void:
             pass
 
         try:
             _walk(other.expression,
                  lambda op, *args: callback(sample_other, op, *args))
-        except EmptyResult:
+        except Void:
             pass
 
         return tuple(sample_self) == tuple(sample_other)
@@ -170,11 +166,11 @@ class TimeIntervalSet(object):
         def callback(op, *args):
             sample.append(op)
             sample.extend(args)
-            raise Omit
+            raise Void
 
         try:
             _walk(self.expression, callback)
-        except EmptyResult:
+        except Void:
             pass
 
         return hash(tuple(sample))
