@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name="pytempo",
+    name="python-tempo",
     version="0.0.1a",
     author="Andrew Pashkin",
     author_email="andrew.pashkin@gmx.co.uk",
