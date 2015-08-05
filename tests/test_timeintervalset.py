@@ -24,19 +24,19 @@ def callback(op, *args):
 
 
 @pytest.mark.parametrize('expression, callback, expected', [
-    ((AND, [True, True]), callback, True),
-    ((AND, [True, False]), callback, False),
-    ((OR, [True, False]), callback, True),
-    ((OR, [False, False]), callback, False),
-    ((NOT, [False]), callback, True),
-    ((NOT, [True]), callback, False),
-    ((AND, [(OR, [False, (NOT, [False]), True, (NOT, [False])])]),
+    ((AND, True, True), callback, True),
+    ((AND, True, False), callback, False),
+    ((OR, True, False), callback, True),
+    ((OR, False, False), callback, False),
+    ((NOT, False), callback, True),
+    ((NOT, True), callback, False),
+    ((AND, (OR, False, (NOT, False), True, (NOT, False))),
      callback, True),
-    ((AND, [(OR, [False, (NOT, [False]), True, (NOT, [True])])]),
+    ((AND, (OR, False, (NOT, False), True, (NOT, True))),
      callback, True),
-    ((AND, [(NOT, [True]), True, (AND, [False, (NOT, [False])])]),
+    ((AND, (NOT, True), True, (AND, False, (NOT, False))),
      callback, False),
-    ((AND, [(NOT, [False]), True, (AND, [True, (NOT, [False])])]),
+    ((AND, (NOT, False), True, (AND, (True, (NOT, False)))),
      callback, True),
 ])
 def test_walk(expression, callback, expected):
@@ -46,7 +46,7 @@ def test_walk(expression, callback, expected):
 
 def test_walk_raises_empty_result():
     """If result of evaluation is empty, EmptyResult is raised."""
-    expression = (OR, [True, False])
+    expression = (OR, True, False)
 
     def callback(*_):
         raise Omit
@@ -56,23 +56,23 @@ def test_walk_raises_empty_result():
 
 
 @pytest.mark.parametrize('first, second, expected', [
-    (TimeIntervalSet((AND, [
+    (TimeIntervalSet((AND,
         TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
-     ])),
-     TimeIntervalSet((AND, [
+        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+     )),
+     TimeIntervalSet((AND,
         TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
-     ])),
+        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+     )),
      True),
-    (TimeIntervalSet((AND, [
+    (TimeIntervalSet((AND,
         TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, [TimeInterval(Interval(2, 3), 'hour', 'day')])
-     ])),
-     TimeIntervalSet((AND, [
+        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+     )),
+     TimeIntervalSet((AND,
         TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, [TimeInterval(Interval(2, 4), 'hour', 'day')])
-     ])),
+        (NOT, TimeInterval(Interval(2, 4), 'hour', 'day'))
+     )),
      False),
 ])
 def test_eq_hash(first, second, expected):
@@ -85,20 +85,20 @@ def test_eq_hash(first, second, expected):
 
 @pytest.mark.parametrize('item, expression, expected', [
     (datetime(2005, 5, 15),
-     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
      True),
     (datetime(2005, 12, 15),
-     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
      False),
     (datetime(2005, 5, 15),
-     (AND, [TimeInterval(Interval(2, 8), 'month', 'year'),
-            (NOT, [TimeInterval(Interval(4, 5), 'month', 'year')])]),
+     (AND, TimeInterval(Interval(2, 8), 'month', 'year'),
+            (NOT, TimeInterval(Interval(4, 5), 'month', 'year'))),
      False),
     ((datetime(2005, 4, 15), datetime(2005, 6, 15)),
-     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
      True),
     ((datetime(2005, 1, 15), datetime(2005, 12, 15)),
-     (AND, [TimeInterval(Interval(2, 8), 'month', 'year')]),
+     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
      False),
 ])
 def test_contains(item, expression, expected):

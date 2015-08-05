@@ -54,10 +54,10 @@ def _walk(expression, callback):
 
         <node>        ::= object|<expression>
         <operator>    ::= AND|OR|NOT
-        <expression> ::= (<operator>, [<node>, ...])
+        <expression> ::= (<operator>, <node>, ...)
 
-        It consists of pair-tuples where the first element is an
-        operator and an the second element is a list of an arguments
+        It consists of tuples where the first element is an
+        operator and an the other elements are an arguments
         for the operator. It can contain sub-expressions or objects,
         which are considered "atomic" and are passed to a 'callback'
         as is.
@@ -100,7 +100,7 @@ def _walk(expression, callback):
 
             e = current.popleft()
             if isinstance(e, tuple):
-                op, values = e
+                op, values = e[0], e[1:]
                 result_stack.append(op)
                 stack.append(deque(values))
                 break
@@ -123,10 +123,10 @@ class TimeIntervalSet(object):
         are `TimeInterval` instances or sub-expressions.
         Example of an expression::
 
-            (AND, [
+            (AND,
                 TimeInterval(Interval(10, 19), 'hour', 'day'),
-                (NOT, [TimeInterval(Interval(14, 15), 'hour', 'day')]),
-                (NOT, [TimeInterval(Interval(6, 7), 'day', 'week')]),
+                (NOT, TimeInterval(Interval(14, 15), 'hour', 'day')),
+                (NOT, TimeInterval(Interval(6, 7), 'day', 'week')),
             ])
 
         It means: 'From 10:00 to 19:00 every day, except from
