@@ -1,14 +1,18 @@
-sudo: false
 language: python
+addons:
+  postgresql: "9.4"
+  apt:
+    packages:
+      - postgresql-plpython-9.4
 install:
-  - pip install tox==1.9.2 coveralls
-env:
-  - TOX_ENV=py27
-  - TOX_ENV=py3
-  - TOX_ENV=py32
-  - TOX_ENV=py33
-  - TOX_ENV=py34
+  - pip install jinja2
 script:
-  - tox -e $TOX_ENV -v
-after_success:
-  coveralls
+  - psql -U postgres -c 'CREATE DATABASE test;'
+  - psql -U postgres -c 'CREATE EXTENSION plpythonu;'
+  - psql -U postgres -d test -c 'CREATE LANGUAGE plpythonu;'
+  - >
+      psql -U postgres -d test -c 'CREATE FUNCTION py_test()
+                                   RETURNS void LANGUAGE plpythonu AS $$
+                                     import jinja2
+                                   $$;'
+  - psql -U postgres -d test -c 'SELECT py_test();'
