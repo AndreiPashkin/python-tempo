@@ -2,7 +2,7 @@
 Python-Tempo
 ============
 
-.. image:: https://travis-ci.org/AndrewPashkin/python-tempo.svg
+.. image:: https://travis-ci.org/AndrewPashkin/python-tempo.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/AndrewPashkin/python-tempo
 
