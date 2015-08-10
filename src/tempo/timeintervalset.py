@@ -1,6 +1,8 @@
 # coding=utf-8
 from collections import deque
 
+from six import string_types
+
 
 NOT = 'NOT'
 AND = 'AND'
@@ -29,7 +31,7 @@ def _evaluate(result_stack, callback):
     while True:
         e = result_stack.pop()
         frame.appendleft(e)
-        if e in _OPS:
+        if isinstance(e, string_types) and e in _OPS:
             if e == NOT:
                 assert len(frame) == 2
             break
@@ -37,6 +39,14 @@ def _evaluate(result_stack, callback):
         result_stack.append(callback(*frame))
     except Void:
         pass
+
+
+def _isexpression(value):
+    """Checks if 'value' is an expression."""
+    return (isinstance(value, (tuple, list, deque)) and
+            len(value) > 0 and
+            isinstance(value[0], string_types) and
+            value[0] in _OPS)
 
 
 def _walk(expression, callback):
@@ -90,12 +100,12 @@ def _walk(expression, callback):
         while True:
             if not (len(current) > 0):
                 del stack[-1]
-                if len(result_stack) > 0 and result_stack[0] in _OPS:
+                if _isexpression(result_stack):
                     _evaluate(result_stack, callback)
                 break
 
             e = current.popleft()
-            if isinstance(e, tuple):
+            if _isexpression(e):
                 op, values = e[0], e[1:]
                 result_stack.append(op)
                 stack.append(deque(values))

@@ -35,7 +35,9 @@ def callback(op, *args):
      callback, True),
     ((AND, (NOT, True), True, (AND, False, (NOT, False))),
      callback, False),
-    ((AND, (NOT, False), True, (AND, (True, (NOT, False)))),
+    ((AND, (NOT, False), True, (AND, True, (NOT, False))),
+     callback, True),
+    ([AND, [NOT, False], True, [AND, True, [NOT, False]]],
      callback, True),
 ])
 def test_walk(expression, callback, expected):
