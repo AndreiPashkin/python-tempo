@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 import datetime as dt
+import json
 
 from tempo.interval import Interval, EmptyInterval
 from tempo.timeutils import delta, floor, add_delta
@@ -182,3 +183,18 @@ class TimeInterval(object):
                 yield Interval(first, second)
             except OverflowError:
                 return
+
+    def to_json(self):
+        """Exports `TimeInterval` instance to JSON serializable
+        representation."""
+        return [[self.interval.start, self.interval.stop],
+                self.unit, self.recurrence]
+
+    @classmethod
+    def from_json(cls, value):
+        """Constructs `TimeInterval` instance from JSON serializable
+        representation or from JSON string."""
+        if not isinstance(value, (list, tuple)):
+            value = json.loads(value)
+
+        return cls(Interval(*value[0]), *value[1:])

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
+import json
 import random as rnd
 from datetime import datetime as dt, timedelta
 from itertools import islice, chain
@@ -284,5 +285,31 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
 
     timeinterval = TimeInterval(interval, unit, recurrence)
     actual = list(islice(timeinterval.forward(initial), None, N))
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize('interval, unit, recurrence, expected', [
+    (Interval(1, 15), U.YEAR, None, [[1, 15], 'year', None]),
+    (Interval(0, 12), U.MONTH, U.YEAR, [[0, 12], 'month', 'year'])
+])
+def test_to_json(interval, unit, recurrence, expected):
+    """Cases for `to_json()` method."""
+    actual = TimeInterval(interval, unit, recurrence).to_json()
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize('value, expected', [
+    (json.dumps([[1, 15], 'year', None]),
+     TimeInterval(Interval(1, 15), U.YEAR, None)),
+    (json.dumps([[1, 15], 'month', 'year']),
+     TimeInterval(Interval(1, 15), U.MONTH, U.YEAR)),
+    ([[1, 15], 'month', 'year'],
+     TimeInterval(Interval(1, 15), U.MONTH, U.YEAR)),
+])
+def test_from_json(value, expected):
+    """Cases for `from_json()` method."""
+    actual = TimeInterval.from_json(value)
 
     assert actual == expected

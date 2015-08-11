@@ -1,7 +1,10 @@
 # coding=utf-8
 from collections import deque
+import json
 
 from six import string_types
+
+from tempo.timeinterval import TimeInterval
 
 
 NOT = 'NOT'
@@ -205,3 +208,34 @@ class TimeIntervalSet(object):
                 return not contains[0]
 
         return _walk(self.expression, callback)
+
+    @staticmethod
+    def to_json_callback(op, *args):
+        result = [op]
+        for arg in args:
+            if isinstance(arg, TimeInterval):
+                arg = arg.to_json()
+            result.append(arg)
+        return result
+
+    def to_json(self):
+        """Exports `TimeIntervalSet` instance to JSON serializable
+        representation."""
+        return _walk(self.expression, self.to_json_callback)
+
+    @staticmethod
+    def from_json_callback(op, *args):
+        result = [op]
+        for arg in args:
+            if isinstance(arg, (list, tuple)):
+                arg = TimeInterval.from_json(arg)
+            result.append(arg)
+        return result
+
+    @classmethod
+    def from_json(cls, value):
+        """Constructs `TimeIntervalSet` instance from JSON serializable
+        representation or from JSON string."""
+        if not isinstance(value, (tuple, list)):
+            value = json.loads(value)
+        return cls(_walk(value, cls.from_json_callback))

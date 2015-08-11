@@ -1,5 +1,6 @@
 # coding=utf-8
 from datetime import datetime
+import json
 
 import pytest
 
@@ -7,6 +8,7 @@ from tempo.interval import Interval
 from tempo.timeinterval import TimeInterval
 
 from tempo.timeintervalset import (AND, NOT, OR, _walk, TimeIntervalSet, Void)
+from tempo.unit import Unit
 
 
 def callback(op, *args):
@@ -105,3 +107,38 @@ def test_eq_hash(first, second, expected):
 def test_contains(item, expression, expected):
     """Cases for containment test."""
     assert (item in TimeIntervalSet(expression)) == expected
+
+
+@pytest.mark.parametrize('timeintervalset, expected', [
+    (TimeIntervalSet(
+        [AND, TimeInterval(Interval(1, 15), Unit.YEAR, None)]
+     ),
+     [AND, [[1, 15], 'year', None]]),
+    (TimeIntervalSet(
+        [AND, TimeInterval(Interval(1, 25), Unit.DAY, Unit.WEEK)]
+     ),
+     [AND, [[1, 25], 'day', 'week']]),
+
+])
+def test_to_json(timeintervalset, expected):
+    """Cases for `to_json()` method."""
+    actual = timeintervalset.to_json()
+
+    assert actual == expected
+
+
+@pytest.mark.parametrize('value, expected', [
+    (json.dumps([AND, [[0, 15], 'day', 'week']]),
+     TimeIntervalSet(
+         [AND, TimeInterval(Interval(0, 15), Unit.DAY, Unit.WEEK)]
+     )),
+    (json.dumps([AND, [[5, 25], 'year', None]]),
+     TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
+    ([AND, [[5, 25], 'year', None]],
+     TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
+])
+def test_from_json(value, expected):
+    """Cases for `from_json()` method."""
+    actual = TimeIntervalSet.from_json(value)
+
+    assert actual == expected
