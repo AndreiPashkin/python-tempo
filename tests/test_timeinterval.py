@@ -96,23 +96,25 @@ def test_containment(unit, recurrence, interval, datetime, expected):
     assert (datetime in timeinterval) == expected
 
 
-@pytest.mark.parametrize('unit, recurrence, sample', [
-    (unit, recurrence, sample(recurrence
-                              if recurrence is not None
-                              else unit))
-    for unit, recurrence in CASES
-] * 10)
-@pytest.mark.parametrize('inclusion, expected', [
-    ('included', True),
-    ('not_included', False)
-])
-def test_interval_containment(unit, recurrence, sample, inclusion, expected):
-    """Cases for containment test of an dates intervals."""
-    correction = BASE[unit]
+@pytest.fixture(
+    params=[('included', True), ('not_included', False)],
+    ids=['Included', 'Not included']
+)
+def bounds(request):
+    """For given 'unit', 'recurrence' and 'sample' date/time outputs
+    various cases of intervals, suitable to build TimeInterval with them
+    and a second interval, that might be included in a first one or not.
+    """
+    unit = request.getfuncargvalue('unit')
+    recurrence = request.getfuncargvalue('recurrence')
+    sample = request.getfuncargvalue('sample')
 
     lower, upper = unit_span(unit, recurrence, sample
                                                if recurrence is not None
                                                else None)
+
+    inclusion, isincluded = request.param
+
     if inclusion == 'included':
         test = lambda outer_start, outer_stop, inner_start, inner_stop: (
             lower <=
@@ -131,6 +133,21 @@ def test_interval_containment(unit, recurrence, sample, inclusion, expected):
     outer_start, outer_stop, inner_start, inner_stop = guess(lower, upper,
                                                              4, test)
 
+    return outer_start, outer_stop, inner_start, inner_stop, isincluded
+
+
+@pytest.mark.parametrize('unit, recurrence, sample', [
+    (unit, recurrence, sample(recurrence
+                              if recurrence is not None
+                              else unit))
+    for unit, recurrence in CASES
+] * 10)
+def test_interval_containment(unit, recurrence, sample, bounds):
+    """Cases for containment test of an dates intervals."""
+    outer_start, outer_stop, inner_start, inner_stop, isincluded = bounds
+
+    correction = BASE[unit]
+
     timeinterval = TimeInterval(Interval(outer_start, outer_stop),
                                 unit, recurrence)
     if recurrence is not None:
@@ -140,7 +157,7 @@ def test_interval_containment(unit, recurrence, sample, inclusion, expected):
         first = add_delta(MIN, inner_start - correction, unit)
         second = add_delta(MIN, inner_stop - correction, unit)
 
-    assert ((first, second) in timeinterval) == expected
+    assert ((first, second) in timeinterval) == isincluded
 
 
 @pytest.mark.parametrize('first, second, expected', [
