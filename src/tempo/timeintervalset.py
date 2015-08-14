@@ -152,6 +152,8 @@ class TimeIntervalSet(object):
 
     @staticmethod
     def _unnest(sample, operator, *args):
+        """Collects operators and arguments to a flat
+        'sample' collection."""
         sample.append(operator)
         sample.extend(args)
         raise Void
