@@ -20,6 +20,19 @@ class Void(Exception):
     pass
 
 
+class Result(object):
+    """Callback result wrapper.
+
+    Intended to be used to avoid confusion between expressions
+    and callback results, in case if they are expressions themselves.
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return 'Result({})'.format(repr(self.value))
+
+
 def _evaluate(result_stack, callback):
     """Evaluates topmost operator in 'result_stack' and appends
     the result of evaluation back.
@@ -235,8 +248,10 @@ class TimeIntervalSet(object):
         for arg in args:
             if isinstance(arg, (list, tuple)):
                 arg = TimeInterval.from_json(arg)
+            elif isinstance(arg, Result):
+                arg = arg.value
             result.append(arg)
-        return result
+        return Result(result)
 
     @classmethod
     def from_json(cls, value):
@@ -244,4 +259,4 @@ class TimeIntervalSet(object):
         representation or from JSON string."""
         if not isinstance(value, (tuple, list)):
             value = json.loads(value)
-        return cls(_walk(value, cls.from_json_callback))
+        return cls(_walk(value, cls.from_json_callback).value)

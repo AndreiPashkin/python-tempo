@@ -136,6 +136,11 @@ def test_to_json(timeintervalset, expected):
      TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
     ([AND, [[5, 25], 'year', None]],
      TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
+    ([AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]],
+     TimeIntervalSet(
+         [AND, TimeInterval(Interval(5, 25), Unit.YEAR, None),
+          [NOT, TimeInterval(Interval(10, 15), 'year', None)]]
+     ))
 ])
 def test_from_json(value, expected):
     """Cases for `from_json()` method."""
