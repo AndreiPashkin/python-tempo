@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding=utf-8
 from calendar import isleap, leapdays
 import datetime as dt
