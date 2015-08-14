@@ -1,6 +1,8 @@
 # coding=utf-8
 import datetime as dt
+import os
 import random as rnd
+import tempo
 
 from tempo.timeutils import floor, delta, add_delta
 from tempo.unit import Unit, ORDER, MIN, MAX, BASE
@@ -89,3 +91,68 @@ def unit_span(unit, recurrence=None, sample=None):
     assert lower != upper and lower < upper
 
     return lower, upper
+
+
+def drop_database(connection, database):
+    """Drops test database."""
+    connection.autocommit = True
+    with connection.cursor() as cursor:
+        cursor.execute('DROP DATABASE IF EXISTS {}'.format(database))
+
+    connection.autocommit = False
+
+
+def create_database(connection, database, user):
+    """Creates test database."""
+    connection.autocommit = True
+    with connection.cursor() as cursor:
+        cursor.execute("CREATE DATABASE \"{}\" "
+                       "WITH OWNER \"{}\" "
+                       "ENCODING 'UTF8' "
+                       "LC_COLLATE 'en_US.UTF-8' "
+                       "LC_CTYPE 'en_US.UTF-8' "
+                       "TEMPLATE template0".format(database, user))
+
+    connection.autocommit = False
+
+
+POSTGRESQL_DIR = os.path.join(os.path.dirname(os.path.abspath(tempo.__file__)),
+                              'postgresql')
+
+
+with open(os.path.join(POSTGRESQL_DIR, 'install.sql')) as file:
+    POSTGRESQL_INSTALL = file.read()
+
+
+with open(os.path.join(POSTGRESQL_DIR, 'uninstall.sql')) as file:
+    POSTGRESQL_UNINSTALL = file.read()
+
+
+def install_postgresql_tempo(connection):
+    """Installs PostgreSQL binding."""
+    with connection.cursor() as cursor:
+        cursor.execute(POSTGRESQL_INSTALL)
+        connection.commit()
+
+
+def uninstall_postgresql_tempo(connection):
+    """Uninstalls PostgreSQL binding."""
+    with connection.cursor() as cursor:
+        cursor.execute(POSTGRESQL_UNINSTALL)
+
+
+def check_plpythonu(connection):
+    """Check if 'plpythonu' language installed."""
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT "
+            "EXISTS (SELECT * FROM pg_language WHERE lanname='plpythonu');"
+        )
+
+        return cursor.fetchone()[0]
+
+def create_plpythonu(connection):
+    """Installs 'plpythonu'."""
+    with connection.cursor() as cursor:
+        cursor.execute('CREATE LANGUAGE plpythonu;')
+

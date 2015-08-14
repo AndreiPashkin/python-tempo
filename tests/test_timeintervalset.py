@@ -1,6 +1,7 @@
 # coding=utf-8
 from datetime import datetime
 import json
+from functools import partial
 
 import pytest
 
@@ -9,6 +10,7 @@ from tempo.timeinterval import TimeInterval
 
 from tempo.timeintervalset import (AND, NOT, OR, _walk, TimeIntervalSet, Void)
 from tempo.unit import Unit
+from tests import Implementation
 
 
 def callback(op, *args):
@@ -86,6 +88,40 @@ def test_eq_hash(first, second, expected):
         assert hash(first) == hash(second)
 
 
+def pg_contains(item, expression, connection):
+    """PostgreSQL binding TimeIntervalSet containment test
+    implementation."""
+    if isinstance(item, tuple):
+        item = list(item)
+
+    timeintervalset = TimeIntervalSet(expression).to_json()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            '''SELECT tempo_timeintervalset_contains(%s, %s)''',
+            (json.dumps(timeintervalset), item)
+        )
+        return cursor.fetchone()[0]
+
+
+def py_contains(item, expression):
+    """Python TimeIntervalSet containment test
+    implementation."""
+    return item in TimeIntervalSet(expression)
+
+
+@pytest.fixture(params=Implementation.values())
+def timeintervalset_contains(request):
+    if request.param == Implementation.PYTHON:
+        return py_contains
+    elif request.param == Implementation.POSTGRESQL:
+        connection = request.getfuncargvalue('connection')
+        request.getfuncargvalue('postgresql_tempo')
+        request.getfuncargvalue('transaction')
+        return partial(pg_contains, connection=connection)
+    else:
+        raise NotImplemented
+
+
 @pytest.mark.parametrize('item, expression, expected', [
     (datetime(2005, 5, 15),
      (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
@@ -104,9 +140,9 @@ def test_eq_hash(first, second, expected):
      (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
      False),
 ])
-def test_contains(item, expression, expected):
+def test_contains(item, expression, expected, timeintervalset_contains):
     """Cases for containment test."""
-    assert (item in TimeIntervalSet(expression)) == expected
+    assert timeintervalset_contains(item, expression) == expected
 
 
 @pytest.mark.parametrize('timeintervalset, expected', [

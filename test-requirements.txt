@@ -1,3 +1,5 @@
 pytest==2.6.4
 pytest-cov==2.0.0
 pytest-cache==1.0
+pytest-capturelog==0.7
+psycopg2==2.6.1

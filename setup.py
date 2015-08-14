@@ -4,6 +4,13 @@
 from setuptools import setup, find_packages
 
 
+def read_requirements(filename):
+    """Returns requirements specs from file with given 'filename'
+    as list."""
+    with open(filename, 'r') as file:
+        return [line.strip() for line in file]
+
+
 setup(
     name="python-tempo",
     version="0.0.1a",
@@ -12,5 +19,8 @@ setup(
     license="BSD",
     packages=find_packages(where='src', include=['tempo', 'tempo.*']),
     package_dir={'': 'src'},
-    install_requires=[line.strip() for line in open("requirements.txt")],
+    extras_require={
+        'postgresql': read_requirements('postgresql-requirements.txt')
+    },
+    install_requires=read_requirements('requirements.txt'),
 )

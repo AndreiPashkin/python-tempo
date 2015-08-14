@@ -1,13 +1,28 @@
-sudo: false
+sudo: required
 language: python
 install:
+  - sudo apt-get -qq update
+  - sudo /etc/init.d/postgresql stop
+  - sudo apt-get install -y postgresql-9.4
+                            postgresql-contrib-9.4
+                            postgresql-plpython-9.4
+  - sudo -u postgres psql -c "ALTER ROLE postgres PASSWORD '$TEMPO_DB_PASSWORD';"
+  - sudo pip install -U pip
+  - sudo pip install .[postgresql]
   - pip install tox==2.1.1 coveralls
 env:
-  - TOX_ENV=py27
-  - TOX_ENV=py3
-  - TOX_ENV=py32
-  - TOX_ENV=py33
-  - TOX_ENV=py34
+  global:
+    - TEMPO_DB_HOST=localhost
+    - TEMPO_DB_PORT=5432
+    - TEMPO_DB_USER=postgres
+    - TEMPO_DB_PASSWORD=secret
+    - TEMPO_DB_NAME=test
+  matrix:
+    - TOX_ENV=py27
+    - TOX_ENV=py3
+    - TOX_ENV=py32
+    - TOX_ENV=py33
+    - TOX_ENV=py34
 script:
   - tox -e $TOX_ENV -v
 after_success:
