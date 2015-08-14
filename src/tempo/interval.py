@@ -115,6 +115,7 @@ class Interval(object):
 
 
 class EmptyIntervalType(Interval):
+    """A class of EmptyInterval singleton value."""
 
     __slots__ = ()
 
