@@ -118,7 +118,7 @@ def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
         raise OverflowError
 
 
-def add_delta(datetime, delta, unit):
+def add_delta(datetime, n, unit):
     """Adds a 'delta' expressed in 'unit' to given 'datetime'.
 
     Parameters
@@ -151,28 +151,28 @@ def add_delta(datetime, delta, unit):
     ... datetime(2000, 10, 15, 0, 0)
     """
     if unit == Unit.SECOND:
-        _check_overflow(datetime, seconds=delta)
-        return datetime + dt.timedelta(seconds=delta)
+        _check_overflow(datetime, seconds=n)
+        return datetime + dt.timedelta(seconds=n)
     elif unit == Unit.MINUTE:
-        _check_overflow(datetime, minutes=delta)
-        return datetime + dt.timedelta(minutes=delta)
+        _check_overflow(datetime, minutes=n)
+        return datetime + dt.timedelta(minutes=n)
     elif unit == Unit.HOUR:
-        _check_overflow(datetime, hours=delta)
-        return datetime + dt.timedelta(hours=delta)
+        _check_overflow(datetime, hours=n)
+        return datetime + dt.timedelta(hours=n)
     elif unit == Unit.DAY:
-        _check_overflow(datetime, days=delta)
-        return datetime + dt.timedelta(days=delta)
+        _check_overflow(datetime, days=n)
+        return datetime + dt.timedelta(days=n)
     elif unit == Unit.WEEK:
-        days = DAYS_IN_WEEK * delta
+        days = DAYS_IN_WEEK * n
         _check_overflow(datetime, days=days)
         return datetime + dt.timedelta(days=days)
     elif unit == Unit.MONTH:
-        sign = int(math.copysign(1, delta))
-        years = abs(delta) // MONTHS_IN_YEAR * sign
+        sign = int(math.copysign(1, n))
+        years = abs(n) // MONTHS_IN_YEAR * sign
 
         if years > 0:
             datetime = _add_years(datetime, years)
-            delta = (abs(delta) % MONTHS_IN_YEAR) * sign
+            n = (abs(n) % MONTHS_IN_YEAR) * sign
 
         matched_years = chain.from_iterable(
             DAYS_OF_COMMON_YEAR
@@ -184,12 +184,12 @@ def add_delta(datetime, delta, unit):
         month_index = datetime.month - 1 + MONTHS_IN_YEAR
 
         days = sum(
-            islice(matched_years, *sorted((month_index, month_index + delta)))
+            islice(matched_years, *sorted((month_index, month_index + n)))
         ) * sign
 
         _check_overflow(datetime, days=days)
         return datetime + dt.timedelta(days=days)
     elif unit == Unit.YEAR:
-        return _add_years(datetime, delta)
+        return _add_years(datetime, n)
     else:
         raise ValueError('Unsupported unit', unit)
