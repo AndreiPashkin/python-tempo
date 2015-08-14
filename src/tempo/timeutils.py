@@ -95,6 +95,7 @@ def delta(datetime1, datetime2, unit):
 
 
 def _add_years(datetime, delta):
+    """Adds 'delta' of years to a 'datetime'."""
     sign = int(math.copysign(1, delta))
     days = (abs(delta) * DAYS_IN_COMMON_YEAR +
             leapdays(*sorted((datetime.year, datetime.year + delta)))) * sign
