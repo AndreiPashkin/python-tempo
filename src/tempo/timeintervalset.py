@@ -193,6 +193,10 @@ class TimeIntervalSet(object):
         test for containment.
         """
         def callback(operator, *args):
+            """Performs a containment test or all arguments
+            of an operator and then applies operator rules to a
+            results.
+            """
             contains = []
             for arg in args:
                 if isinstance(arg, bool):
@@ -211,6 +215,7 @@ class TimeIntervalSet(object):
 
     @staticmethod
     def to_json_callback(operator, *args):
+        """Converts arguments that are time intervals to JSON."""
         result = [operator]
         for arg in args:
             if isinstance(arg, TimeInterval):
@@ -225,6 +230,7 @@ class TimeIntervalSet(object):
 
     @staticmethod
     def from_json_callback(operator, *args):
+        """Converts arguments that are time intervals to Python."""
         result = [operator]
         for arg in args:
             if isinstance(arg, (list, tuple)):
