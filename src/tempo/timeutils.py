@@ -106,6 +106,8 @@ def _add_years(datetime, delta):
 
 def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
                     days=0):
+    """Checks if addition of given number 'seconds', 'minutes', 'hours'
+    and 'days' will produce a point in time beyond defined maximum."""
     delta = dt.timedelta(seconds=seconds, minutes=minutes, hours=hours,
                          days=days)
     total_seconds = delta.total_seconds()
