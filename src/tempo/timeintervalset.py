@@ -32,10 +32,10 @@ def _evaluate(result_stack, callback):
     """
     frame = deque()
     while True:
-        e = result_stack.pop()
-        frame.appendleft(e)
-        if isinstance(e, string_types) and e in _OPS:
-            if e == NOT:
+        item = result_stack.pop()
+        frame.appendleft(item)
+        if isinstance(item, string_types) and item in _OPS:
+            if item == NOT:
                 assert len(frame) == 2
             break
     try:
@@ -80,7 +80,7 @@ def _walk(expression, callback):
         as a variadic positional arguments.
         ::
 
-            callback(op, *args)
+            callback(operator, *args)
 
         `args` may be an "atomic" objects, that were included in the
         expression, or anything that the callback returned as a result
@@ -107,14 +107,14 @@ def _walk(expression, callback):
                     _evaluate(result_stack, callback)
                 break
 
-            e = current.popleft()
-            if _isexpression(e):
-                op, values = e[0], e[1:]
-                result_stack.append(op)
+            item = current.popleft()
+            if _isexpression(item):
+                operator, values = item[0], item[1:]
+                result_stack.append(operator)
                 stack.append(deque(values))
                 break
             else:
-                result_stack.append(e)
+                result_stack.append(item)
     try:
         return result_stack.pop()
     except IndexError:
@@ -154,8 +154,8 @@ class TimeIntervalSet(object):
         sample_self = []
         sample_other = []
 
-        def callback(sample, op, *args):
-            sample.append(op)
+        def callback(sample, operator, *args):
+            sample.append(operator)
             sample.extend(args)
             raise Void
 
@@ -176,8 +176,8 @@ class TimeIntervalSet(object):
     def __hash__(self):
         sample = []
 
-        def callback(op, *args):
-            sample.append(op)
+        def callback(operator, *args):
+            sample.append(operator)
             sample.extend(args)
             raise Void
 
@@ -192,7 +192,7 @@ class TimeIntervalSet(object):
         """Containment test. Accepts whatever TimeInterval can
         test for containment.
         """
-        def callback(op, *args):
+        def callback(operator, *args):
             contains = []
             for arg in args:
                 if isinstance(arg, bool):
@@ -200,18 +200,18 @@ class TimeIntervalSet(object):
                 else:
                     contains.append(item in arg)
 
-            if op == AND:
+            if operator == AND:
                 return all(contains)
-            elif op == OR:
+            elif operator == OR:
                 return any(contains)
-            elif op == NOT:
+            elif operator == NOT:
                 return not contains[0]
 
         return _walk(self.expression, callback)
 
     @staticmethod
-    def to_json_callback(op, *args):
-        result = [op]
+    def to_json_callback(operator, *args):
+        result = [operator]
         for arg in args:
             if isinstance(arg, TimeInterval):
                 arg = arg.to_json()
@@ -224,8 +224,8 @@ class TimeIntervalSet(object):
         return _walk(self.expression, self.to_json_callback)
 
     @staticmethod
-    def from_json_callback(op, *args):
-        result = [op]
+    def from_json_callback(operator, *args):
+        result = [operator]
         for arg in args:
             if isinstance(arg, (list, tuple)):
                 arg = TimeInterval.from_json(arg)
