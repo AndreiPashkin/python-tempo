@@ -118,7 +118,11 @@ def test_contains(item, expression, expected):
         [AND, TimeInterval(Interval(1, 25), Unit.DAY, Unit.WEEK)]
      ),
      [AND, [[1, 25], 'day', 'week']]),
-
+    (TimeIntervalSet(
+         [AND, TimeInterval(Interval(5, 25), Unit.YEAR, None),
+          [NOT, TimeInterval(Interval(10, 15), 'year', None)]]
+     ),
+     [AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]]),
 ])
 def test_to_json(timeintervalset, expected):
     """Cases for `to_json()` method."""
