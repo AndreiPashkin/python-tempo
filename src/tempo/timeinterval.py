@@ -5,7 +5,7 @@ import json
 
 from tempo.interval import Interval, EmptyInterval
 from tempo.timeutils import delta, floor, add_delta
-from tempo.unit import Unit, ORDER, MIN, BASE
+from tempo.unit import Unit, ORDER, MIN, BASE  # pylint: disable=unused-import
 
 
 class TimeInterval(object):

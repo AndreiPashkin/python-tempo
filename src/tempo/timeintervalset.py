@@ -102,7 +102,7 @@ def _walk(expression, callback):
         current = stack[-1]
 
         while True:
-            if not (len(current) > 0):
+            if not (len(current) > 0):  # pylint: disable=superfluous-parens
                 del stack[-1]
                 if _isexpression(result_stack):
                     _evaluate(result_stack, callback)

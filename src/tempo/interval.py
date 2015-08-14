@@ -120,14 +120,14 @@ class EmptyIntervalType(Interval):
     __slots__ = ()
 
     def __new__(cls, *args, **kwargs):
-        global EmptyInterval
+        global EmptyInterval  # pylint: disable=W0602,C0103
 
         if EmptyInterval is None:
             return super(EmptyIntervalType, cls).__new__(cls, *args, **kwargs)
         else:
             raise TypeError('Can not create new instances.')
 
-    def __init__(self):
+    def __init__(self):  # pylint: disable=super-init-not-called
         pass
 
     def __str__(self):
@@ -169,6 +169,6 @@ class EmptyIntervalType(Interval):
     def combine(self, other):
         return other
 
-
+# pylint: disable=invalid-name
 EmptyInterval = None
 EmptyInterval = EmptyIntervalType()
