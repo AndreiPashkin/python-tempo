@@ -161,13 +161,13 @@ class TimeIntervalSet(object):
 
         try:
             _walk(self.expression,
-                 lambda op, *args: callback(sample_self, op, *args))
+                  lambda op, *args: callback(sample_self, op, *args))
         except Void:
             pass
 
         try:
             _walk(other.expression,
-                 lambda op, *args: callback(sample_other, op, *args))
+                  lambda op, *args: callback(sample_other, op, *args))
         except Void:
             pass
 
