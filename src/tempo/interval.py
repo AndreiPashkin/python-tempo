@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Provides Interval class and EmptyInterval singleton value."""
 
 
 class Interval(object):

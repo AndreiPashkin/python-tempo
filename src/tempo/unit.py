@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Date/time related constants."""
 import datetime as dt
 
 # Minimum and maximum points of time within which

@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Utility functions for date/time processing."""
 from calendar import isleap, leapdays
 import datetime as dt
 from itertools import chain, islice

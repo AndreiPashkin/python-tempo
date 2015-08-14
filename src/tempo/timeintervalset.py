@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Provides TimeIntervalSet class."""
 from collections import deque
 import json
 

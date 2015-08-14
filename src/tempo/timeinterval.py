@@ -1,4 +1,5 @@
 # coding=utf-8
+"""Provides TimeInterval class."""
 import datetime as dt
 import json
 
