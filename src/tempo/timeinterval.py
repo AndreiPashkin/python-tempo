@@ -155,10 +155,10 @@ class TimeInterval(object):
 
         correction = -1 * BASE[self.unit]
 
-        def addfloor(base, delta):
+        def addfloor(base, n):
             """Adds 'delta' to 'base' and than floors it
             by unit of this interval."""
-            return floor(add_delta(base, delta, self.unit), self.unit)
+            return floor(add_delta(base, n, self.unit), self.unit)
 
         # Handle possible overlap in first interval
         try:
