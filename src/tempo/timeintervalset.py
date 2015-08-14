@@ -150,24 +150,25 @@ class TimeIntervalSet(object):
     def __repr__(self):
         return self.__str__()
 
+    @staticmethod
+    def _unnest(sample, operator, *args):
+        sample.append(operator)
+        sample.extend(args)
+        raise Void
+
     def __eq__(self, other):
         sample_self = []
         sample_other = []
 
-        def callback(sample, operator, *args):
-            sample.append(operator)
-            sample.extend(args)
-            raise Void
-
         try:
             _walk(self.expression,
-                  lambda op, *args: callback(sample_self, op, *args))
+                  lambda op, *args: self._unnest(sample_self, op, *args))
         except Void:
             pass
 
         try:
             _walk(other.expression,
-                  lambda op, *args: callback(sample_other, op, *args))
+                  lambda op, *args: self._unnest(sample_other, op, *args))
         except Void:
             pass
 
@@ -176,13 +177,9 @@ class TimeIntervalSet(object):
     def __hash__(self):
         sample = []
 
-        def callback(operator, *args):
-            sample.append(operator)
-            sample.extend(args)
-            raise Void
-
         try:
-            _walk(self.expression, callback)
+            _walk(self.expression,
+                  lambda op, *args: self._unnest(sample, op, *args))
         except Void:
             pass
 
