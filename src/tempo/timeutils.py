@@ -108,13 +108,13 @@ def _check_overflow(datetime, seconds=0, minutes=0, hours=0,
                     days=0):
     """Checks if addition of given number 'seconds', 'minutes', 'hours'
     and 'days' will produce a point in time beyond defined maximum."""
-    delta = dt.timedelta(seconds=seconds, minutes=minutes, hours=hours,
-                         days=days)
-    total_seconds = delta.total_seconds()
+    delta_ = dt.timedelta(seconds=seconds, minutes=minutes, hours=hours,
+                          days=days)
+    total_seconds = delta_.total_seconds()
 
-    if (total_seconds > 0) and (datetime > (MAX - abs(delta))):
+    if (total_seconds > 0) and (datetime > (MAX - abs(delta_))):
         raise OverflowError
-    elif (total_seconds < 0) and (datetime < (MIN + abs(delta))):
+    elif (total_seconds < 0) and (datetime < (MIN + abs(delta_))):
         raise OverflowError
 
 
