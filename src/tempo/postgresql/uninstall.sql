@@ -1,10 +1,10 @@
 DROP FUNCTION IF EXISTS tempo_timeintervalset_contains(
   timeintervalset tempo_timeintervalset,
-  datetimes timestamptz
+  datetimes timestamp
 );
 DROP FUNCTION IF EXISTS tempo_timeintervalset_contains(
   timeintervalset tempo_timeintervalset,
-  datetimes timestamptz[2]
+  datetimes timestamp[2]
 );
 
 DROP DOMAIN IF EXISTS tempo_timeintervalset;

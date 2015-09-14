@@ -104,7 +104,7 @@ CONSTRAINT is_timeintervalset_check CHECK (tempo_is_timeintervalset(VALUE));
 -- TimeIntervalSet containment test for a single datetime.
 CREATE OR REPLACE FUNCTION
   tempo_timeintervalset_contains(timeintervalset tempo_timeintervalset,
-                                 datetime timestamptz)
+                                 datetime timestamp)
 RETURNS boolean
 IMMUTABLE
 LANGUAGE plpythonu
@@ -120,7 +120,7 @@ $$;
 -- TimeIntervalSet containment test for a time span.
 CREATE OR REPLACE FUNCTION
   tempo_timeintervalset_contains(timeintervalset tempo_timeintervalset,
-                                 datetimes timestamptz[2])
+                                 datetimes timestamp[2])
 RETURNS boolean
 IMMUTABLE
 LANGUAGE plpythonu
