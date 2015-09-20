@@ -78,41 +78,6 @@ class Interval(object):
     def __le__(self, other):
         return self.start >= other.start and self.stop <= other.stop
 
-    def isoverlap(self, other):
-        """Is this interval overlaps with other one?"""
-        if other is EmptyInterval:
-            return False
-        return not (self.stop < other.start or self.start > other.stop)
-
-    def overlap(self, other):
-        """Returns a new instance of Interval, that represents overlap
-        between this interval and a given one.
-
-        If intervals does not overlap, `EmptyInterval` is returned.
-        """
-        if not self.isoverlap(other):
-            return EmptyInterval
-        elif self <= other:
-            return self.__class__(other.start, other.stop)
-        elif self > other:
-            return self.__class__(self.start, self.stop)
-        else:
-            _, start, stop, _ = sorted((self.start, self.stop,
-                                        other.start, other.stop))
-            return self.__class__(start, stop)
-
-    def combine(self, other):
-        """If two intervals intersect, returns a new interval,
-        that cover space of both. Otherwise - returns `EmptyInterval`.
-        """
-        if not self.isoverlap(other):
-            return EmptyInterval
-
-        start, _, _, stop = sorted((self.start, self.stop,
-                                    other.start, other.stop))
-
-        return self.__class__(start, stop)
-
 
 class EmptyIntervalType(Interval):
     """A class of EmptyInterval singleton value."""
@@ -159,15 +124,6 @@ class EmptyIntervalType(Interval):
 
     def __le__(self, other):
         return True
-
-    def isoverlap(self, other):
-        return False
-
-    def overlap(self, other):
-        return self
-
-    def combine(self, other):
-        return other
 
 # pylint: disable=invalid-name
 EmptyInterval = None
