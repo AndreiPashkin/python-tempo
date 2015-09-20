@@ -1,4 +1,5 @@
 # coding=utf-8
+"""General utilities."""
 from six import iteritems
 
 
