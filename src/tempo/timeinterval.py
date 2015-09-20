@@ -1,9 +1,8 @@
 # coding=utf-8
 """Provides TimeInterval class."""
-import datetime as dt
 import json
 
-from tempo.interval import Interval, EmptyInterval
+from tempo.interval import Interval
 from tempo.timeutils import delta, floor, add_delta
 from tempo.unit import Unit, ORDER, MIN, BASE  # pylint: disable=unused-import
 
@@ -86,33 +85,20 @@ class TimeInterval(object):
 
             4. Resulting delta tested for containment in the interval.
         """
-        if isinstance(item, dt.datetime):
-            item = (item,)
-        elif isinstance(item, (tuple, list)):
-            assert len(item) == 2
-        elif isinstance(item, Interval):
-            item = (item.start, item.stop)
-        elif isinstance(item, EmptyInterval):
-            return True
-        else:
-            raise AssertionError
 
         if self.recurrence is None:
-            time_in_unit = [delta(MIN, e, self.unit) for e in item]
+            time_in_unit = delta(MIN, item, self.unit)
         else:
-            time_in_unit = [delta(floor(e, self.recurrence),
-                                  floor(e, self.unit), self.unit)
-                            for e in item]
+            time_in_unit = delta(floor(item, self.recurrence),
+                                 floor(item, self.unit),
+                                 self.unit)
 
         # Because we need to count not only time
         # that already happened, but also time, expressed in 'unit'
         # that "happening"
-        time_in_unit = [n + 1 for n in time_in_unit]
+        time_in_unit += 1
 
-        if len(item) == 1:
-            return time_in_unit[0] in self.interval
-        elif len(item) == 2:
-            return Interval(*time_in_unit) <= self.interval
+        return time_in_unit in self.interval
 
     def __eq__(self, other):
         return (self.interval == other.interval and

@@ -115,20 +115,3 @@ AS $$
     return (parse_datetime(datetime) in
             TimeIntervalSet.from_json(timeintervalset))
 $$;
-
-
--- TimeIntervalSet containment test for a time span.
-CREATE OR REPLACE FUNCTION
-  tempo_timeintervalset_contains(timeintervalset tempo_timeintervalset,
-                                 datetimes timestamp[2])
-RETURNS boolean
-IMMUTABLE
-LANGUAGE plpythonu
-AS $$
-    from ciso8601 import parse_datetime
-    from tempo.timeintervalset import TimeIntervalSet
-
-    parsed_datetimes = [parse_datetime(datetime) for datetime in datetimes]
-
-    return (parsed_datetimes in TimeIntervalSet.from_json(timeintervalset))
-$$;

@@ -133,12 +133,6 @@ def timeintervalset_contains(request):
      (AND, TimeInterval(Interval(2, 8), 'month', 'year'),
             (NOT, TimeInterval(Interval(4, 5), 'month', 'year'))),
      False),
-    ((datetime(2005, 4, 15), datetime(2005, 6, 15)),
-     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
-     True),
-    ((datetime(2005, 1, 15), datetime(2005, 12, 15)),
-     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
-     False),
 ])
 def test_contains(item, expression, expected, timeintervalset_contains):
     """Cases for containment test."""
