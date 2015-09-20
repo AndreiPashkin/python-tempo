@@ -117,6 +117,15 @@ def test_eq_hash(first, second, expected):
     (Interval(1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
      [Interval(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
       Interval(dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
+    # Cases, when intervals values overflows maximum values of time component.
+    # In that cases it is expected, that results will be clamped by maximum
+    # time component value.
+    (Interval(1, 35), U.DAY, U.MONTH, dt(2000, 1, 1),
+     [Interval(dt(2000, 1, 1), dt(2000, 2, 1)),
+      Interval(dt(2000, 2, 1), dt(2000, 3, 1))]),
+    (Interval(35, 65), U.DAY, U.MONTH, dt(2000, 1, 1),
+     [Interval(dt(2000, 2, 1), dt(2000, 2, 1)),
+      Interval(dt(2000, 3, 1), dt(2000, 3, 1))]),
 ])
 def test_forward_corner_cases(interval, unit, recurrence, start, expected):
     """Corner cases for `forward()` method."""
@@ -203,6 +212,8 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
 
     for i in range(N):
         recurrence_start = floor(start, recurrence)
+        recurrence_stop = floor(add_delta(recurrence_start, 1, recurrence),
+                                recurrence)
         first = floor(add_delta(recurrence_start,
                                 interval.start - correction,
                                 unit), unit)
@@ -210,8 +221,10 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
                                  interval.stop - correction,
                                  unit),
                             unit), 1, unit)
-        assert first < second
-        assert start < second
+        first = min(recurrence_stop, first)
+        second = min(recurrence_stop, second)
+        assert first <= second
+        assert start <= second
         if start > first:
             first = start
 

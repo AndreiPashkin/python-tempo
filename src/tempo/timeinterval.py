@@ -116,6 +116,10 @@ class TimeInterval(object):
     def __repr__(self):
         return self.__str__()
 
+    def _clamp_by_recurrence(self, base, *dates):
+        max_ = floor(add_delta(base, 1, self.recurrence), self.recurrence)
+        return [min(d, max_) for d in dates]
+
     def forward(self, start):
         """Iterate time intervals starting from 'start'.
         Intervals returned in form of `(start, end)` pair,
@@ -150,10 +154,14 @@ class TimeInterval(object):
         try:
             first = addfloor(base, self.interval.start + correction)
             second = addfloor(base, self.interval.stop + correction + 1)
-            if first < start < second:
-                yield Interval(start, second)
-            elif start <= first:
-                yield Interval(first, second)
+
+            if start > first:
+                first = start
+
+            if self.recurrence is not None:
+                first, second = self._clamp_by_recurrence(base, first, second)
+
+            yield Interval(first, second)
         except OverflowError:
             return
 
@@ -166,6 +174,8 @@ class TimeInterval(object):
                 second = addfloor(base, self.interval.stop + correction + 1)
                 if base > first:  # In case if flooring by week resulted
                     first = base  # as a time earlier than 'base'
+
+                first, second = self._clamp_by_recurrence(base, first, second)
                 yield Interval(first, second)
             except OverflowError:
                 return
