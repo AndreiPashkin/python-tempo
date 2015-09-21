@@ -23,7 +23,7 @@ class TimeInterval(object):
     start : int
         Start of recurring interval.
     stop : int
-        End of recurring interval.
+        Non-inclusive end of recurring interval.
     unit : str
        Unit of time in which time interval is expressed.
     recurrence : str, optional
@@ -84,6 +84,7 @@ class TimeInterval(object):
 
             4. Resulting delta tested for containment in the interval.
         """
+        correction = BASE[self.unit]
 
         if self.recurrence is None:
             time_in_unit = delta(MIN, item, self.unit)
@@ -92,12 +93,9 @@ class TimeInterval(object):
                                  floor(item, self.unit),
                                  self.unit)
 
-        # Because we need to count not only time
-        # that already happened, but also time, expressed in 'unit'
-        # that "happening"
-        time_in_unit += 1
+        time_in_unit += correction
 
-        return self.start <= time_in_unit <= self.stop
+        return self.start <= time_in_unit < self.stop
 
     def __eq__(self, other):
         return (self.start == other.start and
@@ -154,7 +152,7 @@ class TimeInterval(object):
         # Handle possible overlap in first interval
         try:
             first = addfloor(base, self.start + correction)
-            second = addfloor(base, self.stop + correction + 1)
+            second = addfloor(base, self.stop + correction)
 
             if start > first:
                 first = start
@@ -172,7 +170,7 @@ class TimeInterval(object):
             base = add_delta(base, 1, self.recurrence)
             try:
                 first = addfloor(base, self.start + correction)
-                second = addfloor(base, self.stop + correction + 1)
+                second = addfloor(base, self.stop + correction)
                 if base > first:  # In case if flooring by week resulted
                     first = base  # as a time earlier than 'base'
 
