@@ -7,7 +7,6 @@ from itertools import islice, chain
 import pytest
 from six.moves import range
 
-from tempo.interval import Interval
 from tempo.timeinterval import Unit as U, TimeInterval
 from tempo.timeutils import add_delta, delta, floor
 from tempo.unit import MIN, MAX, BASE
@@ -91,16 +90,16 @@ from tests.utils import randuniq, CASES, unit_span, guess, sample
 ])
 def test_containment(unit, recurrence, interval, datetime, expected):
     """Various cases of containment test."""
-    timeinterval = TimeInterval(Interval(*interval), unit, recurrence)
+    timeinterval = TimeInterval(interval[0], interval[1], unit, recurrence)
 
     assert (datetime in timeinterval) == expected
 
 
 @pytest.mark.parametrize('first, second, expected', [
-    (TimeInterval(Interval(10), U.MINUTE, U.HOUR),
-     TimeInterval(Interval(10), U.MINUTE, U.HOUR), True),
-    (TimeInterval(Interval(10), U.MINUTE, U.HOUR),
-     TimeInterval(Interval(10), U.MINUTE, U.YEAR), False),
+    (TimeInterval(0, 10, U.MINUTE, U.HOUR),
+     TimeInterval(0, 10, U.MINUTE, U.HOUR), True),
+    (TimeInterval(0, 10, U.MINUTE, U.HOUR),
+     TimeInterval(0, 10, U.MINUTE, U.YEAR), False),
 ])
 def test_eq_hash(first, second, expected):
     """Cases for equality test and hashing."""
@@ -114,23 +113,23 @@ def test_eq_hash(first, second, expected):
     # Since week and months are not "synchronous", flooring by week
     # might result a date with month earlier than in passed date.
     # And it might cause invalid (earlier) "starts" in `forward()` results.
-    (Interval(1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
-     [Interval(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
-      Interval(dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
+    ((1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
+     [(dt(3600, 9, 1, 0, 0), dt(3600, 9, 18, 0, 0)),
+      (dt(3600, 10, 1, 0, 0), dt(3600, 10, 16, 0, 0))]),
     # Cases, when intervals values overflows maximum values of time component.
     # In that cases it is expected, that results will be clamped by maximum
     # time component value.
-    (Interval(1, 35), U.DAY, U.MONTH, dt(2000, 1, 1),
-     [Interval(dt(2000, 1, 1), dt(2000, 2, 1)),
-      Interval(dt(2000, 2, 1), dt(2000, 3, 1))]),
-    (Interval(35, 65), U.DAY, U.MONTH, dt(2000, 1, 1),
-     [Interval(dt(2000, 2, 1), dt(2000, 2, 1)),
-      Interval(dt(2000, 3, 1), dt(2000, 3, 1))]),
+    ((1, 35), U.DAY, U.MONTH, dt(2000, 1, 1),
+     [(dt(2000, 1, 1), dt(2000, 2, 1)),
+      (dt(2000, 2, 1), dt(2000, 3, 1))]),
+    ((35, 65), U.DAY, U.MONTH, dt(2000, 1, 1),
+     [(dt(2000, 2, 1), dt(2000, 2, 1)),
+      (dt(2000, 3, 1), dt(2000, 3, 1))]),
 ])
 def test_forward_corner_cases(interval, unit, recurrence, start, expected):
     """Corner cases for `forward()` method."""
-    timeinterval = TimeInterval(interval=interval, unit=unit,
-                                recurrence=recurrence)
+    timeinterval = TimeInterval(start=interval[0], stop=interval[1],
+                                unit=unit, recurrence=recurrence)
     actual = list(islice((e for e in timeinterval.forward(start)),
                          len(expected)))
 
@@ -154,25 +153,21 @@ def test_forward_non_recurrent_random(unit, overlap):
 
     unit_maximum = delta(MIN, max_, unit)
 
-    interval = Interval(*sorted(randuniq(2, correction, unit_maximum)))
+    interval = sorted(randuniq(2, correction, unit_maximum))
 
     if overlap:
         start = add_delta(
             MIN,
-            rnd.randrange(
-                int(interval.start), int(interval.stop)
-            ) - correction,
+            rnd.randrange(int(interval[0]), int(interval[1])) - correction,
             unit
         )
     else:
-        start = add_delta(MIN,
-                          int(interval.start) - correction,
-                          unit)
+        start = add_delta(MIN, int(interval[0]) - correction, unit)
 
-    stop = add_delta(MIN, int(interval.stop) - correction + 1, unit)
-    expected = [Interval(start, stop)]
+    stop = add_delta(MIN, int(interval[1]) - correction + 1, unit)
+    expected = [(start, stop)]
 
-    timeinterval = TimeInterval(interval, unit, None)
+    timeinterval = TimeInterval(interval[0], interval[1], unit, None)
     actual = list(islice(timeinterval.forward(start), None, N))
 
     assert actual == expected
@@ -192,7 +187,7 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
 
     unit_maximum = delta(MIN, add_delta(MIN, 1, recurrence), unit)
 
-    interval = Interval(*sorted(randuniq(2, correction, unit_maximum)))
+    from_, to = sorted(randuniq(2, correction, unit_maximum))
 
     expected = []
 
@@ -205,7 +200,7 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
         initial = start = add_delta(
             initial,
             rnd.randrange(
-                int(interval.start), int(interval.stop)
+                int(from_), int(to)
             ) - correction,
             unit
         )
@@ -215,10 +210,10 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
         recurrence_stop = floor(add_delta(recurrence_start, 1, recurrence),
                                 recurrence)
         first = floor(add_delta(recurrence_start,
-                                interval.start - correction,
+                                from_ - correction,
                                 unit), unit)
         second = add_delta(floor(add_delta(recurrence_start,
-                                 interval.stop - correction,
+                                 to - correction,
                                  unit),
                             unit), 1, unit)
         first = min(recurrence_stop, first)
@@ -228,33 +223,33 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
         if start > first:
             first = start
 
-        expected.append(Interval(first, second))
+        expected.append((first, second))
         start = floor(add_delta(recurrence_start, 1, recurrence), recurrence)
 
-    timeinterval = TimeInterval(interval, unit, recurrence)
+    timeinterval = TimeInterval(from_, to, unit, recurrence)
     actual = list(islice(timeinterval.forward(initial), None, N))
 
     assert actual == expected
 
 
 @pytest.mark.parametrize('interval, unit, recurrence, expected', [
-    (Interval(1, 15), U.YEAR, None, [[1, 15], 'year', None]),
-    (Interval(0, 12), U.MONTH, U.YEAR, [[0, 12], 'month', 'year'])
+    ((1, 15), U.YEAR, None, [[1, 15], 'year', None]),
+    ((0, 12), U.MONTH, U.YEAR, [[0, 12], 'month', 'year'])
 ])
 def test_to_json(interval, unit, recurrence, expected):
     """Cases for `to_json()` method."""
-    actual = TimeInterval(interval, unit, recurrence).to_json()
+    actual = TimeInterval(interval[0], interval[1], unit, recurrence).to_json()
 
     assert actual == expected
 
 
 @pytest.mark.parametrize('value, expected', [
     (json.dumps([[1, 15], 'year', None]),
-     TimeInterval(Interval(1, 15), U.YEAR, None)),
+     TimeInterval(1, 15, U.YEAR, None)),
     (json.dumps([[1, 15], 'month', 'year']),
-     TimeInterval(Interval(1, 15), U.MONTH, U.YEAR)),
+     TimeInterval(1, 15, U.MONTH, U.YEAR)),
     ([[1, 15], 'month', 'year'],
-     TimeInterval(Interval(1, 15), U.MONTH, U.YEAR)),
+     TimeInterval(1, 15, U.MONTH, U.YEAR)),
 ])
 def test_from_json(value, expected):
     """Cases for `from_json()` method."""

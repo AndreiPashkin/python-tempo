@@ -2,7 +2,6 @@
 """Provides TimeInterval class."""
 import json
 
-from tempo.interval import Interval
 from tempo.timeutils import delta, floor, add_delta
 from tempo.unit import Unit, ORDER, MIN, BASE  # pylint: disable=unused-import
 
@@ -21,8 +20,10 @@ class TimeInterval(object):
 
     Parameters
     ----------
-    interval : tempo.interval.Interval
-        Recurring interval of time.
+    start : int
+        Start of recurring interval.
+    stop : int
+        End of recurring interval.
     unit : str
        Unit of time in which time interval is expressed.
     recurrence : str, optional
@@ -32,17 +33,14 @@ class TimeInterval(object):
     Examples
     --------
     >>> from datetime import datetime
-    >>> from tempo.interval import Interval
-    >>> timeinterval = TimeInterval(Unit.SECOND,
-    ...                             Unit.MINUTE,
-    ...                             Interval(15))
+    >>> timeinterval = TimeInterval(0, 15, Unit.SECOND, Unit.MINUTE)
     >>> datetime(2000, 1, 1, 5, 3, 10) in timeinterval
     ... True
     >>> datetime(2000, 1, 1, 5, 3, 16) in timeinterval
     ... False
     """
 
-    def __init__(self, interval, unit, recurrence=None):
+    def __init__(self, start, stop, unit, recurrence=None):
         if recurrence is not None:
             assert ORDER[unit] < ORDER[recurrence], (
                 '"{unit} of {recurrence}" is impossible combination.'
@@ -51,7 +49,8 @@ class TimeInterval(object):
 
         self.unit = unit
         self.recurrence = recurrence
-        self.interval = interval
+        self.start = start
+        self.stop = stop
 
     def __contains__(self, item):
         """Test given datetime 'item' for containment in the time interval.
@@ -98,19 +97,21 @@ class TimeInterval(object):
         # that "happening"
         time_in_unit += 1
 
-        return time_in_unit in self.interval
+        return self.start <= time_in_unit <= self.stop
 
     def __eq__(self, other):
-        return (self.interval == other.interval and
+        return (self.start == other.start and
+                self.stop == other.stop and
                 self.unit == other.unit and
                 self.recurrence == other.recurrence)
 
     def __hash__(self):
-        return hash((self.interval, self.unit, self.recurrence))
+        return hash((self.start, self.stop, self.unit, self.recurrence))
 
     def __str__(self):
-        return ('TimeInterval({interval}, {unit}, {recurrence})'
-                .format(interval=repr(self.interval), unit=repr(self.unit),
+        return ('TimeInterval({start}, {stop}, {unit}, {recurrence})'
+                .format(start=repr(self.start), stop=repr(self.stop),
+                        unit=repr(self.unit),
                         recurrence=repr(self.recurrence)))
 
     def __repr__(self):
@@ -152,8 +153,8 @@ class TimeInterval(object):
 
         # Handle possible overlap in first interval
         try:
-            first = addfloor(base, self.interval.start + correction)
-            second = addfloor(base, self.interval.stop + correction + 1)
+            first = addfloor(base, self.start + correction)
+            second = addfloor(base, self.stop + correction + 1)
 
             if start > first:
                 first = start
@@ -161,7 +162,7 @@ class TimeInterval(object):
             if self.recurrence is not None:
                 first, second = self._clamp_by_recurrence(base, first, second)
 
-            yield Interval(first, second)
+            yield first, second
         except OverflowError:
             return
 
@@ -170,20 +171,20 @@ class TimeInterval(object):
         while True:  # Handle recurring intervals
             base = add_delta(base, 1, self.recurrence)
             try:
-                first = addfloor(base, self.interval.start + correction)
-                second = addfloor(base, self.interval.stop + correction + 1)
+                first = addfloor(base, self.start + correction)
+                second = addfloor(base, self.stop + correction + 1)
                 if base > first:  # In case if flooring by week resulted
                     first = base  # as a time earlier than 'base'
 
                 first, second = self._clamp_by_recurrence(base, first, second)
-                yield Interval(first, second)
+                yield first, second
             except OverflowError:
                 return
 
     def to_json(self):
         """Exports `TimeInterval` instance to JSON serializable
         representation."""
-        return [[self.interval.start, self.interval.stop],
+        return [[self.start, self.stop],
                 self.unit, self.recurrence]
 
     @classmethod
@@ -193,4 +194,4 @@ class TimeInterval(object):
         if not isinstance(value, (list, tuple)):
             value = json.loads(value)
 
-        return cls(Interval(*value[0]), *value[1:])
+        return cls(value[0][0], value[0][1], *value[1:])

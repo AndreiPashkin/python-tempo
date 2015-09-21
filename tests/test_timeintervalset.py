@@ -5,7 +5,6 @@ from functools import partial
 
 import pytest
 
-from tempo.interval import Interval
 from tempo.timeinterval import TimeInterval
 
 from tempo.timeintervalset import (AND, NOT, OR, _walk, TimeIntervalSet, Void)
@@ -62,21 +61,21 @@ def test_walk_raises_void():
 
 @pytest.mark.parametrize('first, second, expected', [
     (TimeIntervalSet((AND,
-        TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+        TimeInterval(0, 5, 'hour', 'day'),
+        (NOT, TimeInterval(2, 3, 'hour', 'day'))
      )),
      TimeIntervalSet((AND,
-        TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+        TimeInterval(0, 5, 'hour', 'day'),
+        (NOT, TimeInterval(2, 3, 'hour', 'day'))
      )),
      True),
     (TimeIntervalSet((AND,
-        TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, TimeInterval(Interval(2, 3), 'hour', 'day'))
+        TimeInterval(0, 5, 'hour', 'day'),
+        (NOT, TimeInterval(2, 3, 'hour', 'day'))
      )),
      TimeIntervalSet((AND,
-        TimeInterval(Interval(0, 5), 'hour', 'day'),
-        (NOT, TimeInterval(Interval(2, 4), 'hour', 'day'))
+        TimeInterval(0, 5, 'hour', 'day'),
+        (NOT, TimeInterval(2, 4, 'hour', 'day'))
      )),
      False),
 ])
@@ -124,14 +123,14 @@ def timeintervalset_contains(request):
 
 @pytest.mark.parametrize('item, expression, expected', [
     (datetime(2005, 5, 15),
-     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
+     (AND, TimeInterval(2, 8, 'month', 'year')),
      True),
     (datetime(2005, 12, 15),
-     (AND, TimeInterval(Interval(2, 8), 'month', 'year')),
+     (AND, TimeInterval(2, 8, 'month', 'year')),
      False),
     (datetime(2005, 5, 15),
-     (AND, TimeInterval(Interval(2, 8), 'month', 'year'),
-            (NOT, TimeInterval(Interval(4, 5), 'month', 'year'))),
+     (AND, TimeInterval(2, 8, 'month', 'year'),
+            (NOT, TimeInterval(4, 5, 'month', 'year'))),
      False),
 ])
 def test_contains(item, expression, expected, timeintervalset_contains):
@@ -141,16 +140,16 @@ def test_contains(item, expression, expected, timeintervalset_contains):
 
 @pytest.mark.parametrize('timeintervalset, expected', [
     (TimeIntervalSet(
-        [AND, TimeInterval(Interval(1, 15), Unit.YEAR, None)]
+        [AND, TimeInterval(1, 15, Unit.YEAR, None)]
      ),
      [AND, [[1, 15], 'year', None]]),
     (TimeIntervalSet(
-        [AND, TimeInterval(Interval(1, 25), Unit.DAY, Unit.WEEK)]
+        [AND, TimeInterval(1, 25, Unit.DAY, Unit.WEEK)]
      ),
      [AND, [[1, 25], 'day', 'week']]),
     (TimeIntervalSet(
-         [AND, TimeInterval(Interval(5, 25), Unit.YEAR, None),
-          [NOT, TimeInterval(Interval(10, 15), 'year', None)]]
+         [AND, TimeInterval(5, 25, Unit.YEAR, None),
+          [NOT, TimeInterval(10, 15, 'year', None)]]
      ),
      [AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]]),
 ])
@@ -164,16 +163,16 @@ def test_to_json(timeintervalset, expected):
 @pytest.mark.parametrize('value, expected', [
     (json.dumps([AND, [[0, 15], 'day', 'week']]),
      TimeIntervalSet(
-         [AND, TimeInterval(Interval(0, 15), Unit.DAY, Unit.WEEK)]
+         [AND, TimeInterval(0, 15, Unit.DAY, Unit.WEEK)]
      )),
     (json.dumps([AND, [[5, 25], 'year', None]]),
-     TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
+     TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
     ([AND, [[5, 25], 'year', None]],
-     TimeIntervalSet([AND, TimeInterval(Interval(5, 25), Unit.YEAR, None)])),
+     TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
     ([AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]],
      TimeIntervalSet(
-         [AND, TimeInterval(Interval(5, 25), Unit.YEAR, None),
-          [NOT, TimeInterval(Interval(10, 15), 'year', None)]]
+         [AND, TimeInterval(5, 25, Unit.YEAR, None),
+          [NOT, TimeInterval(10, 15, 'year', None)]]
      ))
 ])
 def test_from_json(value, expected):
