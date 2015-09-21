@@ -1,4 +1,5 @@
 # coding=utf-8
+import datetime as dt
 import pytest
 
 from tempo.sparseinterval import SparseInterval
@@ -15,6 +16,9 @@ from tempo.sparseinterval import SparseInterval
      [(10, 15)]),
     ([], [(10, 15)],
      [(10, 15)]),
+    ([(dt.datetime(2000, 1, 1), dt.datetime(2000, 5, 1))],
+     [(dt.datetime(2000, 2, 1), dt.datetime(2000, 10, 1))],
+     [(dt.datetime(2000, 1, 1), dt.datetime(2000, 10, 1))]),
 ])
 def test_union(ranges1, ranges2, expected):
     """Union cases."""
@@ -38,6 +42,9 @@ def test_union(ranges1, ranges2, expected):
      []),
     ([(1, 20), (40, 60)], [(5, 5)],
      []),
+    ([(dt.datetime(2000, 1, 1), dt.datetime(2000, 10, 1))],
+     [(dt.datetime(2000, 5, 1), dt.datetime(2000, 12, 1))],
+     [(dt.datetime(2000, 5, 1), dt.datetime(2000, 10, 1))]),
 ])
 def test_intersection(ranges1, ranges2, expected):
     """Intersection cases."""
@@ -61,6 +68,9 @@ def test_intersection(ranges1, ranges2, expected):
      [(1, 20), (40, 60)]),
     ([(1, 20), (40, 60)], [(5, 5)],
      [(1, 20), (40, 60)]),
+    ([(dt.datetime(2000, 1, 1), dt.datetime(2000, 10, 1))],
+     [(dt.datetime(2000, 5, 1), dt.datetime(2000, 12, 1))],
+     [(dt.datetime(2000, 1, 1), dt.datetime(2000, 5, 1))]),
 ])
 def test_difference(ranges1, ranges2, expected):
     """Difference cases."""
