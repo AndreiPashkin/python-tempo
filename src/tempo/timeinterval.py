@@ -3,7 +3,8 @@
 import json
 
 from tempo.timeutils import delta, floor, add_delta
-from tempo.unit import Unit, ORDER, MIN, BASE  # pylint: disable=unused-import
+# pylint: disable=unused-import
+from tempo.unit import Unit, ORDER, MIN, MAX, BASE, UNITS_MAX
 
 
 class TimeInterval(object):
@@ -119,6 +120,19 @@ class TimeInterval(object):
         max_ = floor(add_delta(base, 1, self.recurrence), self.recurrence)
         return [min(d, max_) for d in dates]
 
+    def isgapless(self):
+        """Tests if the TimeInterval instance defines
+        infinite time interval."""
+        if self.recurrence is None:
+            return False
+
+        correction = BASE[self.unit]
+
+        return (
+            (self.start - correction) == 0 and
+            (self.stop - correction) == UNITS_MAX[self.unit][self.recurrence]
+        )
+
     def forward(self, start):
         """Iterate time intervals starting from 'start'.
         Intervals returned in form of `(start, end)` pair,
@@ -152,10 +166,15 @@ class TimeInterval(object):
         # Handle possible overlap in first interval
         try:
             first = addfloor(base, self.start + correction)
-            second = addfloor(base, self.stop + correction)
 
             if start > first:
                 first = start
+
+            if self.isgapless():
+                yield first, MAX
+                return
+
+            second = addfloor(base, self.stop + correction)
 
             if self.recurrence is not None:
                 first, second = self._clamp_by_recurrence(base, first, second)

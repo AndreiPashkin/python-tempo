@@ -59,3 +59,45 @@ BASE = {
     Unit.MONTH : 1,
     Unit.YEAR  : 1
 }
+
+# Maximum values of time components
+UNITS_MAX = {
+    Unit.SECOND: {
+        Unit.MINUTE: SECONDS_IN_MINUTE,
+        Unit.HOUR:   SECONDS_IN_HOUR,
+        Unit.DAY:    SECONDS_IN_DAY,
+        Unit.WEEK:   SECONDS_IN_WEEK,
+        Unit.MONTH:  SECONDS_IN_DAY * max(DAYS_OF_COMMON_YEAR +
+                                          DAYS_OF_LEAP_YEAR),
+        Unit.YEAR:   SECONDS_IN_DAY * max(DAYS_IN_COMMON_YEAR,
+                                          DAYS_IN_LEAP_YEAR),
+    },
+    Unit.MINUTE: {
+        Unit.HOUR:  MINUTES_IN_HOUR,
+        Unit.DAY:   MINUTES_IN_DAY,
+        Unit.WEEK:  MINUTES_IN_WEEK,
+        Unit.MONTH: MINUTES_IN_DAY * max(DAYS_OF_COMMON_YEAR +
+                                         DAYS_OF_LEAP_YEAR),
+        Unit.YEAR:  MINUTES_IN_DAY * max(DAYS_IN_COMMON_YEAR,
+                                         DAYS_IN_LEAP_YEAR),
+    },
+    Unit.HOUR: {
+        Unit.DAY:   HOURS_IN_DAY,
+        Unit.WEEK:  HOURS_IN_WEEK,
+        Unit.MONTH: HOURS_IN_DAY * max(DAYS_OF_COMMON_YEAR +
+                                       DAYS_OF_LEAP_YEAR),
+        Unit.YEAR:  HOURS_IN_DAY * max(DAYS_IN_COMMON_YEAR, DAYS_IN_LEAP_YEAR)
+    },
+    Unit.DAY: {
+        Unit.WEEK:  DAYS_IN_WEEK,
+        Unit.MONTH: max(DAYS_OF_COMMON_YEAR + DAYS_OF_LEAP_YEAR),
+        Unit.YEAR:  max(DAYS_IN_COMMON_YEAR, DAYS_IN_LEAP_YEAR)
+    },
+    Unit.WEEK: {
+        Unit.MONTH: 6,
+        Unit.YEAR:  64,
+    },
+    Unit.MONTH: {
+        Unit.YEAR: MONTHS_IN_YEAR
+    }
+}

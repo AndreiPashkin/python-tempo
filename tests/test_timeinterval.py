@@ -132,6 +132,11 @@ def test_eq_hash(first, second, expected):
       (dt(2000, 2, 1), dt(2000, 3, 1))]),
     ((1, 20), U.DAY, U.MONTH, dt(2000, 1, 1),
      [(dt(2000, 1, 1), dt(2000, 1, 20))]),
+    # Case of gapless interval
+    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1),
+     [(dt(2000, 1, 1), MAX)]),
+    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1),
+     [(dt(2000, 1, 1), MAX)]),
 ])
 def test_forward_corner_cases(interval, unit, recurrence, start, expected):
     """Corner cases for `forward()` method."""
