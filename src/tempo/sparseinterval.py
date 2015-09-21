@@ -17,6 +17,10 @@ class SparseInterval(object):
         self._union(intervals)
         self._intervals = intervals
 
+    @property
+    def intervals(self):
+        return self._intervals
+
     @staticmethod
     def _union(intervals):
         """Unions sub-intervals of 'intervals' in-place.
