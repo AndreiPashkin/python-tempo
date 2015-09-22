@@ -1,5 +1,5 @@
 # coding=utf-8
-from datetime import datetime
+import datetime as dt
 import json
 from functools import partial
 
@@ -122,13 +122,13 @@ def timeintervalset_contains(request):
 
 
 @pytest.mark.parametrize('item, expression, expected', [
-    (datetime(2005, 5, 15),
+    (dt.datetime(2005, 5, 15),
      (AND, TimeInterval(2, 8, 'month', 'year')),
      True),
-    (datetime(2005, 12, 15),
+    (dt.datetime(2005, 12, 15),
      (AND, TimeInterval(2, 8, 'month', 'year')),
      False),
-    (datetime(2005, 5, 15),
+    (dt.datetime(2005, 5, 15),
      (AND, TimeInterval(2, 8, 'month', 'year'),
             (NOT, TimeInterval(4, 5, 'month', 'year'))),
      True),
