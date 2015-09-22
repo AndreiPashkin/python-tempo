@@ -1,11 +1,15 @@
 # coding=utf-8
 """Provides TimeIntervalSet class."""
+import itertools as it
 from collections import deque
 import json
 
 from six import string_types
+from six.moves import reduce  # pylint: disable=redefined-builtin
 
 from tempo.timeinterval import TimeInterval
+from tempo.sparseinterval import SparseInterval
+from tempo.unit import MIN, MAX
 
 
 NOT = 'NOT'
@@ -225,6 +229,115 @@ class TimeIntervalSet(object):
                 return not contains[0]
 
         return _walk(self.expression, callback)
+
+    def forward(self, start):
+        """Generates intervals according to the expression.
+
+        Intervals never overlap.
+        Each next interval is largest possbile interval.
+
+        Parameters
+        ----------
+        start : datetime.datetime
+            Inclusive start date.
+
+        Yields
+        ------
+        tuple
+            Inclusive start and non-inclusive dates of an interval.
+
+        Notes
+        -----
+        The alghorithm is simple:
+
+            1. It generates intervals from TimeInterval instances and
+               applies set logic operators on them.
+            2. Checks if resulting interval has gap.
+            3. Checks if there is a possibility, that this gap will gone,
+               by checking if some of the generators could possibly generate
+               interval that will intersect with gap.
+            4. If checks succeed, yields interval previous to gap.
+            5. If not - iterates generators until check succeed.
+
+        This implementation if fairly ineffective and should be otimized.
+        """
+        context = {
+            'all': []
+        }
+
+        def prepare(operator, *args):
+            """Initializes forward() generators of TimeIntervals."""
+            prepared = [operator]
+            for arg in args:
+                if isinstance(arg, TimeInterval):
+                    arg = {
+                        'generator': arg.forward(start),
+                        'results': SparseInterval(),
+                        'exhausted': False
+                    }
+                    context['all'].append(arg)
+                elif isinstance(arg, Result):
+                    arg = arg.value
+                prepared.append(arg)
+
+            return Result(prepared)
+
+        generators = _walk(self.expression, prepare).value
+
+        def generate(operator, *args):
+            """Generates SparseInterval instance current and past
+            results of TimeInterval.forward() generators with respect
+            to 'operator' of given expression."""
+            operands = []
+            for arg in args:
+                if isinstance(arg, dict):
+                    try:
+                        result = next(arg['generator'])
+                        arg['results'] = (
+                            arg['results'].union(SparseInterval(*[result]))
+                        )
+                    except StopIteration:
+                        arg['exhausted'] = True
+                    operands.append(arg['results'])
+                elif isinstance(arg, SparseInterval):
+                    operands.append(arg)
+            if operator == AND:
+                return reduce(lambda m, v: m.intersection(v), operands)
+            elif operator == OR:
+                return reduce(lambda m, v: m.union(v), operands)
+            elif operator == NOT:
+                union = reduce(lambda m, v: m.union(v), operands)
+                intervals = it.chain((MIN,),
+                                     it.chain.from_iterable(union.intervals),
+                                     (MAX,))
+                return SparseInterval(*zip(intervals, intervals))
+            else:
+                raise AssertionError
+
+        last_date = None
+        while True:
+            generated = _walk(generators, generate)
+
+            if (len(generated.intervals) == 0 and
+                all(e['exhausted'] for e in context['all'])):
+                return
+
+            # Has gap
+            if len(generated.intervals) > 1:
+                if last_date is None:
+                    last_date = generated.intervals[0][1]
+
+                for item in context['all']:
+                    if len(item['results'].intervals) == 0:
+                        continue
+                    if (item['results'].intervals[-1][1] < last_date and
+                        not item['exhausted']):
+                        break
+                else:
+                    yield next((a, b) for a, b in generated.intervals
+                               if b == last_date)
+                    last_date = next(b for _, b in generated.intervals
+                                     if b > last_date)
 
     @staticmethod
     def to_json_callback(operator, *args):

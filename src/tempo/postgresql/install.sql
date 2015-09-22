@@ -115,3 +115,23 @@ AS $$
     return (parse_datetime(datetime) in
             TimeIntervalSet.from_json(timeintervalset))
 $$;
+
+
+-- TimeIntervalSet forward intervals as set of rows.
+CREATE OR REPLACE FUNCTION
+  tempo_timeintervalset_forward(timeintervalset tempo_timeintervalset,
+                                start timestamp, n integer)
+RETURNS TABLE(start timestamp, stop timestamp)
+IMMUTABLE
+LANGUAGE plpythonu
+AS $$
+    import itertools as it
+    from ciso8601 import parse_datetime
+    from tempo.timeintervalset import TimeIntervalSet
+
+    for interval in it.islice(TimeIntervalSet
+                                  .from_json(timeintervalset)
+                                  .forward(parse_datetime(start)),
+                              n):
+        yield interval
+$$;

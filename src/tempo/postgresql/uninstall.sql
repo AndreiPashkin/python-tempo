@@ -3,6 +3,10 @@ DROP FUNCTION IF EXISTS tempo_timeintervalset_contains(
   datetimes timestamp
 );
 
+DROP FUNCTION IF EXISTS tempo_timeintervalset_forward(
+    timeintervalset tempo_timeintervalset, start timestamp, n integer
+);
+
 DROP DOMAIN IF EXISTS tempo_timeintervalset;
 DROP FUNCTION IF EXISTS tempo_is_timeintervalset(jsonb);
 

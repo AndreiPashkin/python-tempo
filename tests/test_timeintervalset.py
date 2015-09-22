@@ -2,6 +2,7 @@
 import datetime as dt
 import json
 from functools import partial
+import itertools as it
 
 import pytest
 
@@ -178,5 +179,66 @@ def test_to_json(timeintervalset, expected):
 def test_from_json(value, expected):
     """Cases for `from_json()` method."""
     actual = TimeIntervalSet.from_json(value)
+
+    assert actual == expected
+
+
+def py_forward(expression, start, n):
+    """Python API for TimeIntervalSet.forward()"""
+    return list(it.islice(TimeIntervalSet.from_json(expression)
+                                         .forward(start), n))
+
+
+def pg_forward(expression, start, n, connection):
+    """PostgreSQL API for TimeIntervalSet.forward()."""
+
+    timeintervalset = TimeIntervalSet.from_json(expression).to_json()
+    with connection.cursor() as cursor:
+        cursor.execute(
+            '''SELECT * FROM tempo_timeintervalset_forward(%s, %s, %s)''',
+            (json.dumps(timeintervalset), start, n)
+        )
+
+        return list(cursor.fetchall())
+
+
+@pytest.fixture(params=Implementation.values())
+def timeintervalset_forward(request):
+    """Various APIs for TimeIntervalSet.forwars()."""
+    if request.param == Implementation.PYTHON:
+        return py_forward
+    elif request.param == Implementation.POSTGRESQL:
+        connection = request.getfuncargvalue('connection')
+        request.getfuncargvalue('postgresql_tempo')
+        request.getfuncargvalue('transaction')
+        return partial(pg_forward, connection=connection)
+    else:
+        raise NotImplemented
+
+
+@pytest.mark.parametrize('expression, start, expected', [
+    ([OR, [[1, 15], 'day', 'month'], [[15, 20], 'day', 'month']],
+     dt.datetime(2000, 1, 1),
+     [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 20)),
+      (dt.datetime(2000, 2, 1), dt.datetime(2000, 2, 20))]),
+    ([AND, [[1, 15], 'day', 'month'], [[10, 20], 'day', 'month']],
+     dt.datetime(2000, 1, 1),
+     [(dt.datetime(2000, 1, 10), dt.datetime(2000, 1, 15)),
+      (dt.datetime(2000, 2, 10), dt.datetime(2000, 2, 15))]),
+    ([AND, [[1, 25], 'day', 'month'], [NOT, [[10, 15], 'day', 'month']]],
+     dt.datetime(2000, 1, 1),
+     [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 10)),
+      (dt.datetime(2000, 1, 15), dt.datetime(2000, 1, 25))]),
+    ([AND, [[1, 10], 'day', 'month'], [[15, 20], 'day', 'month']],
+     dt.datetime(2000, 1, 1),
+     []),
+    ([AND, [[5, 10], 'day', 'month'], [[15, 20], 'hour', 'day']],
+     dt.datetime(2000, 1, 1),
+     [(dt.datetime(2000, 1, 5, 15), dt.datetime(2000, 1, 5, 20)),
+      (dt.datetime(2000, 2, 5, 15), dt.datetime(2000, 2, 5, 20))]),
+])
+def test_forward(expression, start, expected, timeintervalset_forward):
+    """Various forward() cases."""
+    actual = timeintervalset_forward(expression, start, len(expected))
 
     assert actual == expected
