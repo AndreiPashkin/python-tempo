@@ -133,7 +133,7 @@ class TimeInterval(object):
             (self.stop - correction) == UNITS_MAX[self.unit][self.recurrence]
         )
 
-    def forward(self, start):
+    def forward(self, start, trim=True):
         """Iterate time intervals starting from 'start'.
         Intervals returned in form of `(start, end)` pair,
         where `start` is a datetime object representing the start
@@ -143,6 +143,10 @@ class TimeInterval(object):
         ----------
         start : datetime.datetime
             A lower bound for the resulting sequence of intervals.
+        trim : bool
+            Whether a first interval should be trimmed by 'start' or
+            it should be full, so it's start point may potentially be
+            earlier, that 'start'.
 
         Yields
         ------
@@ -151,6 +155,7 @@ class TimeInterval(object):
         end : datetime.datetime
             End of an interval.
         """
+        # pylint: disable=too-many-branches
         if self.recurrence is None:
             base = MIN
         else:
@@ -168,7 +173,15 @@ class TimeInterval(object):
             first = addfloor(base, self.start + correction)
 
             if start > first:
-                first = start
+                if trim:
+                    first = start
+                # If 'unit' is week, 'first' could be earlier than
+                # start of 'recurrence' time component corresponding to
+                # 'start'.
+                elif self.recurrence is not None:
+                    recurrence_start = floor(start, self.recurrence)
+                    if first < recurrence_start:
+                        first = recurrence_start
 
             if self.isgapless():
                 yield first, MAX

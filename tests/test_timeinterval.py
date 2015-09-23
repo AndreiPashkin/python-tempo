@@ -113,36 +113,40 @@ def test_eq_hash(first, second, expected):
         assert hash(first) == hash(second)
 
 
-@pytest.mark.parametrize('interval, unit, recurrence, start, expected', [
+@pytest.mark.parametrize('interval, unit, recurrence, start, trim, expected', [
     # Since week and months are not "synchronous", flooring by week
     # might result a date with month earlier than in passed date.
     # And it might cause invalid (earlier) "starts" in `forward()` results.
-    ((1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1),
+    ((1, 3), U.WEEK, U.MONTH, dt(3600, 9, 1), True,
      [(dt(3600, 9, 1, 0, 0), dt(3600, 9, 11, 0, 0)),
       (dt(3600, 10, 1, 0, 0), dt(3600, 10, 9, 0, 0))]),
     # Cases, when intervals values overflows maximum values of time component.
     # In that cases it is expected, that results will be clamped by maximum
     # time component value.
-    ((1, 35), U.DAY, U.MONTH, dt(2000, 1, 1),
+    ((1, 35), U.DAY, U.MONTH, dt(2000, 1, 1), True,
      [(dt(2000, 1, 1), dt(2000, 2, 1)),
       (dt(2000, 2, 1), dt(2000, 3, 1))]),
     # Non-inclusive end with one-based units
-    ((1, 6), U.WEEK, U.MONTH, dt(2000, 1, 1),
+    ((1, 6), U.WEEK, U.MONTH, dt(2000, 1, 1), True,
      [(dt(2000, 1, 1), dt(2000, 1, 31)),
       (dt(2000, 2, 1), dt(2000, 3, 1))]),
-    ((1, 20), U.DAY, U.MONTH, dt(2000, 1, 1),
+    ((1, 20), U.DAY, U.MONTH, dt(2000, 1, 1), True,
      [(dt(2000, 1, 1), dt(2000, 1, 20))]),
     # Case of gapless interval
-    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1),
+    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1), True,
      [(dt(2000, 1, 1), MAX)]),
-    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1),
+    ((0, 60), U.SECOND, U.MINUTE, dt(2000, 1, 1), True,
      [(dt(2000, 1, 1), MAX)]),
+    # trim=False
+    ((10, 20), U.DAY, U.MONTH, dt(2000, 1, 15), False,
+     [(dt(2000, 1, 10), dt(2000, 1, 20))])
 ])
-def test_forward_corner_cases(interval, unit, recurrence, start, expected):
+def test_forward_corner_cases(interval, unit, recurrence, start, trim,
+                              expected):
     """Corner cases for `forward()` method."""
     timeinterval = TimeInterval(start=interval[0], stop=interval[1],
                                 unit=unit, recurrence=recurrence)
-    actual = list(islice((e for e in timeinterval.forward(start)),
+    actual = list(islice((e for e in timeinterval.forward(start, trim)),
                          len(expected)))
 
     assert actual == expected
@@ -150,13 +154,14 @@ def test_forward_corner_cases(interval, unit, recurrence, start, expected):
 
 N = 10
 
-
-@pytest.mark.parametrize('unit, overlap', chain.from_iterable([
-    [(unit, True), (unit, False)]
+# TODO Refactor using fixtures
+@pytest.mark.parametrize('unit, overlap, trim', chain.from_iterable([
+    [(unit, True, False), (unit, False, False),
+     (unit, True, True), (unit, False, True)]
     for unit, recurrence in CASES
     if recurrence is None
 ] * 10))
-def test_forward_non_recurrent_random(unit, overlap):
+def test_forward_non_recurrent_random(unit, overlap, trim):
     """`forward()` method of non-recurrent time intervals with and without
     overlapping `start` date."""
     correction = BASE[unit]
@@ -176,21 +181,29 @@ def test_forward_non_recurrent_random(unit, overlap):
     else:
         start = add_delta(MIN, int(interval[0]) - correction, unit)
 
+    if trim:
+        expected_start = start
+    else:
+        expected_start = add_delta(MIN, int(interval[0]) - correction, unit)
+
     stop = add_delta(MIN, int(interval[1]) - correction, unit)
-    expected = [(start, stop)]
+
+    expected = [(expected_start, stop)]
 
     timeinterval = TimeInterval(interval[0], interval[1], unit, None)
-    actual = list(islice(timeinterval.forward(start), None, N))
+    actual = list(islice(timeinterval.forward(start, trim), None, N))
 
     assert actual == expected
 
 
-@pytest.mark.parametrize('unit, recurrence, overlap', chain.from_iterable([
-    [(unit, recurrence, True), (unit, recurrence, False)]
+@pytest.mark.parametrize('unit, recurrence, overlap, trim',
+chain.from_iterable([
+    [(unit, recurrence, True, False), (unit, recurrence, False, False),
+     (unit, recurrence, True, True), (unit, recurrence, False, True)]
     for unit, recurrence in CASES
     if recurrence is not None
 ] * 10))
-def test_forward_recurrent_random(unit, recurrence, overlap):
+def test_forward_recurrent_random(unit, recurrence, overlap, trim):
     """`forward()` method of recurrent time intervals with and without
     overlapping `start` date."""
     correction = BASE[unit]
@@ -227,18 +240,18 @@ def test_forward_recurrent_random(unit, recurrence, overlap):
                                 unit), unit)
         second = floor(add_delta(recurrence_start, to - correction, unit),
                        unit)
-        first = min(recurrence_stop, first)
+        first = max(recurrence_start, min(first, recurrence_stop))
         second = min(recurrence_stop, second)
         assert first <= second
         assert start <= second
-        if start > first:
+        if start > first and trim:
             first = start
 
         expected.append((first, second))
         start = floor(add_delta(recurrence_start, 1, recurrence), recurrence)
 
     timeinterval = TimeInterval(from_, to, unit, recurrence)
-    actual = list(islice(timeinterval.forward(initial), None, N))
+    actual = list(islice(timeinterval.forward(initial, trim), None, N))
 
     assert actual == expected
 
