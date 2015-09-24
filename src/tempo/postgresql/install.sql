@@ -42,8 +42,8 @@ BEGIN
   ELSE
     IF jsonb_typeof(item) != 'array' THEN
       RETURN false;
-    recurrence := item -> 2;
     END IF;
+    recurrence := item -> 2;
     RETURN (
       jsonb_array_length(item -> 0) = 2 AND
       (SELECT bool_and(e ~ '^\d+$')
