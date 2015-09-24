@@ -2,6 +2,8 @@
 """Date/time related constants."""
 import datetime as dt
 
+from tempo.utils import Enum
+
 # Minimum and maximum points of time within which
 # the library is able to operate
 MIN = dt.datetime(year=1, month=1, day=1)
@@ -27,7 +29,7 @@ DAYS_OF_COMMON_YEAR = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 DAYS_OF_LEAP_YEAR   = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 
-class Unit:  # pylint: disable=old-style-class,no-init
+class Unit(Enum):  # pylint: disable=no-init
     """"Enumeration of supported time units."""
     SECOND  = 'second'
     MINUTE  = 'minute'

@@ -9,7 +9,7 @@ from six.moves import reduce  # pylint: disable=redefined-builtin
 
 from tempo.timeinterval import TimeInterval
 from tempo.sparseinterval import SparseInterval
-from tempo.unit import MIN, MAX
+from tempo.unit import MIN, MAX, Unit
 
 
 NOT = 'NOT'
@@ -18,6 +18,7 @@ OR  = 'OR'
 
 
 _OPS = {NOT, AND, OR}
+_UNITS = set(Unit.values())
 
 
 class Void(Exception):
@@ -373,3 +374,48 @@ class TimeIntervalSet(object):
         if not isinstance(value, (tuple, list)):
             value = json.loads(value)
         return cls(_walk(value, cls.from_json_callback).value)
+
+    @staticmethod
+    def validate_json(expression):
+        """Validates JSON expression."""
+        if isinstance(expression, string_types):
+            try:
+                expression = json.loads(expression)
+            except ValueError:
+                return False
+
+        if not isinstance(expression, (list, tuple)):
+            return False
+
+        queued = deque([expression])
+
+        while len(queued) > 0:
+            current = queued.pop()
+
+            for e in current[1:]:
+                if not isinstance(e, (list, tuple)):
+                    return False
+
+                if len(e) < 2:
+                    return False
+
+                if e[0] in _OPS:
+                    queued.appendleft(e)
+                    continue
+                elif len(e) != 4:
+                    return False
+
+                if not all(n >= 0 for n in e[:2]):
+                    return False
+
+                unit = e[2]
+
+                if unit not in _UNITS:
+                    return False
+
+                recurrence = e[3]
+
+                if recurrence not in _UNITS and recurrence is not None:
+                    return False
+
+        return True

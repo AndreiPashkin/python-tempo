@@ -242,3 +242,13 @@ def test_forward(expression, start, expected, timeintervalset_forward):
     actual = timeintervalset_forward(expression, start, len(expected))
 
     assert actual == expected
+
+
+@pytest.mark.parametrize('expression, expected', [
+    ([AND, [1, 5, "month", "year"], [NOT, [1, 15, "day", "month"]]], True),
+    ([AND, [1, 2, "months", "year"]], False),
+    ('["AND", [1, 2, "month", "year"]]', True),
+])
+def test_validate_json(expression, expected):
+    """Cases for TimeIntervalSet.validate_json()."""
+    assert TimeIntervalSet.validate_json(expression) == expected
