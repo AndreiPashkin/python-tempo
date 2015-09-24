@@ -214,8 +214,7 @@ class TimeInterval(object):
     def to_json(self):
         """Exports `TimeInterval` instance to JSON serializable
         representation."""
-        return [[self.start, self.stop],
-                self.unit, self.recurrence]
+        return [self.start, self.stop, self.unit, self.recurrence]
 
     @classmethod
     def from_json(cls, value):
@@ -224,4 +223,4 @@ class TimeInterval(object):
         if not isinstance(value, (list, tuple)):
             value = json.loads(value)
 
-        return cls(value[0][0], value[0][1], *value[1:])
+        return cls(value[0], value[1], value[2], value[3])

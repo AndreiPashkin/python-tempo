@@ -40,15 +40,15 @@ BEGIN
   THEN
     RETURN false;
   ELSE
-    IF jsonb_typeof(item) != 'array' THEN
+    IF jsonb_typeof(item) != 'array' OR jsonb_array_length(item) != 4 THEN
       RETURN false;
     END IF;
-    recurrence := item -> 2;
+    recurrence := item -> 3;
     RETURN (
-      jsonb_array_length(item -> 0) = 2 AND
-      (SELECT bool_and(e ~ '^\d+$')
-       FROM jsonb_array_elements_text(item -> 0) AS e) AND
-      tempo_is_unit(item -> 1) AND
+      (WITH interval(value) AS (VALUES (item -> 0), (item -> 1))
+       SELECT bool_and(value::text ~ '^\d+$')
+       FROM interval) AND
+      tempo_is_unit(item -> 2) AND
       (tempo_is_unit(recurrence) OR (recurrence = 'null'::jsonb))
     );
   END IF;

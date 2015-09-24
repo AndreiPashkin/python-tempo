@@ -257,8 +257,8 @@ def test_forward_recurrent_random(unit, recurrence, overlap, trim):
 
 
 @pytest.mark.parametrize('interval, unit, recurrence, expected', [
-    ((1, 15), U.YEAR, None, [[1, 15], 'year', None]),
-    ((0, 12), U.MONTH, U.YEAR, [[0, 12], 'month', 'year'])
+    ((1, 15), U.YEAR, None, [1, 15, 'year', None]),
+    ((0, 12), U.MONTH, U.YEAR, [0, 12, 'month', 'year'])
 ])
 def test_to_json(interval, unit, recurrence, expected):
     """Cases for `to_json()` method."""
@@ -268,11 +268,11 @@ def test_to_json(interval, unit, recurrence, expected):
 
 
 @pytest.mark.parametrize('value, expected', [
-    (json.dumps([[1, 15], 'year', None]),
+    (json.dumps([1, 15, 'year', None]),
      TimeInterval(1, 15, U.YEAR, None)),
-    (json.dumps([[1, 15], 'month', 'year']),
+    (json.dumps([1, 15, 'month', 'year']),
      TimeInterval(1, 15, U.MONTH, U.YEAR)),
-    ([[1, 15], 'month', 'year'],
+    ([1, 15, 'month', 'year'],
      TimeInterval(1, 15, U.MONTH, U.YEAR)),
 ])
 def test_from_json(value, expected):

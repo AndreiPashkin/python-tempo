@@ -143,16 +143,16 @@ def test_contains(item, expression, expected, timeintervalset_contains):
     (TimeIntervalSet(
         [AND, TimeInterval(1, 15, Unit.YEAR, None)]
      ),
-     [AND, [[1, 15], 'year', None]]),
+     [AND, [1, 15, 'year', None]]),
     (TimeIntervalSet(
         [AND, TimeInterval(1, 25, Unit.DAY, Unit.WEEK)]
      ),
-     [AND, [[1, 25], 'day', 'week']]),
+     [AND, [1, 25, 'day', 'week']]),
     (TimeIntervalSet(
          [AND, TimeInterval(5, 25, Unit.YEAR, None),
           [NOT, TimeInterval(10, 15, 'year', None)]]
      ),
-     [AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]]),
+     [AND, [5, 25, 'year', None], [NOT, [10, 15, 'year', None]]]),
 ])
 def test_to_json(timeintervalset, expected):
     """Cases for `to_json()` method."""
@@ -162,15 +162,15 @@ def test_to_json(timeintervalset, expected):
 
 
 @pytest.mark.parametrize('value, expected', [
-    (json.dumps([AND, [[0, 15], 'day', 'week']]),
+    (json.dumps([AND, [0, 15, 'day', 'week']]),
      TimeIntervalSet(
          [AND, TimeInterval(0, 15, Unit.DAY, Unit.WEEK)]
      )),
-    (json.dumps([AND, [[5, 25], 'year', None]]),
+    (json.dumps([AND, [5, 25, 'year', None]]),
      TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
-    ([AND, [[5, 25], 'year', None]],
+    ([AND, [5, 25, 'year', None]],
      TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
-    ([AND, [[5, 25], 'year', None], [NOT, [[10, 15], 'year', None]]],
+    ([AND, [5, 25, 'year', None], [NOT, [10, 15, 'year', None]]],
      TimeIntervalSet(
          [AND, TimeInterval(5, 25, Unit.YEAR, None),
           [NOT, TimeInterval(10, 15, 'year', None)]]
@@ -217,22 +217,22 @@ def timeintervalset_forward(request):
 
 
 @pytest.mark.parametrize('expression, start, expected', [
-    ([OR, [[1, 15], 'day', 'month'], [[15, 20], 'day', 'month']],
+    ([OR, [1, 15, 'day', 'month'], [15, 20, 'day', 'month']],
      dt.datetime(2000, 1, 1),
      [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 20)),
       (dt.datetime(2000, 2, 1), dt.datetime(2000, 2, 20))]),
-    ([AND, [[1, 15], 'day', 'month'], [[10, 20], 'day', 'month']],
+    ([AND, [1, 15, 'day', 'month'], [10, 20, 'day', 'month']],
      dt.datetime(2000, 1, 1),
      [(dt.datetime(2000, 1, 10), dt.datetime(2000, 1, 15)),
       (dt.datetime(2000, 2, 10), dt.datetime(2000, 2, 15))]),
-    ([AND, [[1, 25], 'day', 'month'], [NOT, [[10, 15], 'day', 'month']]],
+    ([AND, [1, 25, 'day', 'month'], [NOT, [10, 15, 'day', 'month']]],
      dt.datetime(2000, 1, 1),
      [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 10)),
       (dt.datetime(2000, 1, 15), dt.datetime(2000, 1, 25))]),
-    ([AND, [[1, 10], 'day', 'month'], [[15, 20], 'day', 'month']],
+    ([AND, [1, 10, 'day', 'month'], [15, 20, 'day', 'month']],
      dt.datetime(2000, 1, 1),
      []),
-    ([AND, [[5, 10], 'day', 'month'], [[15, 20], 'hour', 'day']],
+    ([AND, [5, 10, 'day', 'month'], [15, 20, 'hour', 'day']],
      dt.datetime(2000, 1, 1),
      [(dt.datetime(2000, 1, 5, 15), dt.datetime(2000, 1, 5, 20)),
       (dt.datetime(2000, 2, 5, 15), dt.datetime(2000, 2, 5, 20))]),
