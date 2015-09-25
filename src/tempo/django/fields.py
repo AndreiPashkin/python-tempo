@@ -28,7 +28,7 @@ class TimeIntervalSetField(with_metaclass(models.SubfieldBase, models.Field)):
         # We only handle 'exact' and 'in'. All others are errors.
         if lookup_type == 'contains':
             return value.isoformat()
-        elif lookup_type == 'intersects':
+        elif lookup_type == 'intersects' or lookup_type == 'occurs_within':
             return (value[0].isoformat(), value[1].isoformat())
         else:
             raise TypeError('Lookup type %r not supported.' % lookup_type)
@@ -76,3 +76,24 @@ class Intersects(models.Lookup):
                 """ % (rhs, rhs, lhs, rhs), (stop, start, start))
 
 TimeIntervalSetField.register_lookup(Intersects)
+
+
+class OccursWithin(models.Lookup):
+    """Checks if some of continous events, defined in time interval set
+    is enclosed by dates in given pair-tuple of datetime objects."""
+    lookup_name = 'occurs_within'
+
+    def as_sql(self, compiler, connection):
+        lhs, _ = self.process_lhs(compiler, connection)
+        rhs, _ = self.process_rhs(compiler, connection)
+
+        start, stop = self.rhs
+
+        return ("""(SELECT bool_and(start >= %s AND stop <= %s) FROM
+                    tempo_timeintervalset_forward(
+                        %s::tempo_timeintervalset, %s::timestamp, 1,
+                        false
+                    ))
+                """ % (rhs, rhs, lhs, rhs), (start, stop, start))
+
+TimeIntervalSetField.register_lookup(OccursWithin)
