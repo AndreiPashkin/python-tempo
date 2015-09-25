@@ -88,6 +88,15 @@ def test_eq_hash(first, second, expected):
         assert hash(first) == hash(second)
 
 
+def test_eq_with_other_type():
+    """Equality for object with othery type should not throw exceptions
+    and return False."""
+    timeintervalset = TimeIntervalSet.from_json([AND, 0, 10, 'hour', 'day'])
+    other = object()
+
+    assert not (timeintervalset == other)
+
+
 def pg_contains(item, expression, connection):
     """PostgreSQL binding TimeIntervalSet containment test
     implementation."""

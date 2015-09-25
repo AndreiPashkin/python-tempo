@@ -81,3 +81,12 @@ def test_difference(ranges1, ranges2, expected):
     expected = SparseInterval(*expected)
 
     assert actual == expected
+
+
+def test_eq_with_other_type():
+    """Equality for object with othery type should not throw exceptions
+    and return False."""
+    sparseinterval = SparseInterval(*[(1, 20)])
+    other = object()
+
+    assert not (sparseinterval == other)

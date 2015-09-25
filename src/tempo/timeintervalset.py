@@ -178,6 +178,9 @@ class TimeIntervalSet(object):
         raise Void
 
     def __eq__(self, other):
+        if not hasattr(other, 'expression'):
+            return False
+
         sample_self = []
         sample_other = []
 

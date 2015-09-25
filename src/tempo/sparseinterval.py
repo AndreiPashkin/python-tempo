@@ -104,8 +104,11 @@ class SparseInterval(object):
         return self.__class__(*intervals)
 
     def __eq__(self, other):
-        return (self._intervals ==
-                other._intervals)  # pylint: disable=protected-access
+        try:
+            return (self._intervals ==
+                    other._intervals)  # pylint: disable=protected-access
+        except AttributeError:
+            return False
 
     def __hash__(self):
         return hash(self._intervals)

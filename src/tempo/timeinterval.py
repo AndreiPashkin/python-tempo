@@ -99,10 +99,13 @@ class TimeInterval(object):
         return self.start <= time_in_unit < self.stop
 
     def __eq__(self, other):
-        return (self.start == other.start and
-                self.stop == other.stop and
-                self.unit == other.unit and
-                self.recurrence == other.recurrence)
+        try:
+            return (self.start == other.start and
+                    self.stop == other.stop and
+                    self.unit == other.unit and
+                    self.recurrence == other.recurrence)
+        except AttributeError:
+            return False
 
     def __hash__(self):
         return hash((self.start, self.stop, self.unit, self.recurrence))

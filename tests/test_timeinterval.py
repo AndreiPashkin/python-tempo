@@ -113,6 +113,15 @@ def test_eq_hash(first, second, expected):
         assert hash(first) == hash(second)
 
 
+def test_eq_with_other_type():
+    """Equality for object with othery type should not throw exceptions
+    and return False."""
+    timeinterval = TimeInterval(0, 10, U.MINUTE, U.HOUR)
+    other = object()
+
+    assert not (timeinterval == other)
+
+
 @pytest.mark.parametrize('interval, unit, recurrence, start, trim, expected', [
     # Since week and months are not "synchronous", flooring by week
     # might result a date with month earlier than in passed date.
