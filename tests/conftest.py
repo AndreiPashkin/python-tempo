@@ -75,8 +75,14 @@ def transaction(request):
     """
     connection_ = request.getfuncargvalue('connection')
 
+    with connection_.cursor() as cursor:
+        cursor.execute('SAVEPOINT tempo_test_transaction_begin;')
+
     def rollback():
-        connection_.rollback()
+        with connection_.cursor() as cursor:
+            cursor.execute(
+                'ROLLBACK TO SAVEPOINT tempo_test_transaction_begin;'
+            )
 
     request.addfinalizer(rollback)
 
@@ -86,7 +92,6 @@ def postgresql_tempo(request):
     """Python-tempo PostgreSQL binding."""
     connection_ = request.getfuncargvalue('connection')
     create_plpythonu(connection_)
-    uninstall_postgresql_tempo(connection_)
     install_postgresql_tempo(connection_)
 
     def finalizer():

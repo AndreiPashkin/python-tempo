@@ -124,21 +124,17 @@ with open(os.path.join(POSTGRESQL_DIR, 'install.sql')) as file:
     POSTGRESQL_INSTALL = file.read()
 
 
-with open(os.path.join(POSTGRESQL_DIR, 'uninstall.sql')) as file:
-    POSTGRESQL_UNINSTALL = file.read()
-
-
 def install_postgresql_tempo(connection):
     """Installs PostgreSQL binding."""
     with connection.cursor() as cursor:
         cursor.execute(POSTGRESQL_INSTALL)
-        connection.commit()
+        cursor.execute('SAVEPOINT install_postgresql_tempo;')
 
 
 def uninstall_postgresql_tempo(connection):
     """Uninstalls PostgreSQL binding."""
     with connection.cursor() as cursor:
-        cursor.execute(POSTGRESQL_UNINSTALL)
+        cursor.execute('ROLLBACK TO SAVEPOINT install_postgresql_tempo;')
 
 
 def check_plpythonu(connection):
