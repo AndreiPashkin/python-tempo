@@ -2,5 +2,6 @@ pytest==2.6.4
 pytest-cov==2.1.0
 pytest-cache==1.0
 pytest-capturelog==0.7
+pytest-django==2.8.0
 psycopg2==2.6.1
 pdbpp==0.8.3

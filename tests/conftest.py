@@ -100,6 +100,20 @@ def postgresql_tempo(request):
     request.addfinalizer(finalizer)
 
 
+@pytest.fixture()
+def django_postgresql_tempo(request):
+    """Python-tempo PostgreSQL binding using Django connection."""
+    from django.db import connection as connection_
+
+    create_plpythonu(connection_)
+    install_postgresql_tempo(connection_)
+
+    def finalizer():
+        uninstall_postgresql_tempo(connection_)
+
+    request.addfinalizer(finalizer)
+
+
 def pytest_runtest_setup(item):
     transaction_marker = item.get_marker("transaction")
     if transaction_marker is not None:

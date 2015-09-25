@@ -18,11 +18,16 @@ env:
     - TEMPO_DB_PASSWORD=secret
     - TEMPO_DB_NAME=test
   matrix:
-    - TOX_ENV=py27
-    - TOX_ENV=py3
-    - TOX_ENV=py32
-    - TOX_ENV=py33
-    - TOX_ENV=py34
+    - TOX_ENV=py27-django17
+    - TOX_ENV=py27-django18
+    - TOX_ENV=py3-django17
+    - TOX_ENV=py3-django18
+    - TOX_ENV=py32-django17
+    - TOX_ENV=py32-django18
+    - TOX_ENV=py33-django17
+    - TOX_ENV=py33-django18
+    - TOX_ENV=py34-django17
+    - TOX_ENV=py34-django18
     - TOX_ENV=pep8
     - TOX_ENV=pylint
 script:
