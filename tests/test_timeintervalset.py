@@ -192,20 +192,20 @@ def test_from_json(value, expected):
     assert actual == expected
 
 
-def py_forward(expression, start, n):
+def py_forward(expression, start, trim, n):
     """Python API for TimeIntervalSet.forward()"""
     return list(it.islice(TimeIntervalSet.from_json(expression)
-                                         .forward(start), n))
+                                         .forward(start, trim), n))
 
 
-def pg_forward(expression, start, n, connection):
+def pg_forward(expression, start, trim, n, connection):
     """PostgreSQL API for TimeIntervalSet.forward()."""
 
     timeintervalset = TimeIntervalSet.from_json(expression).to_json()
     with connection.cursor() as cursor:
         cursor.execute(
-            '''SELECT * FROM tempo_timeintervalset_forward(%s, %s, %s)''',
-            (json.dumps(timeintervalset), start, n)
+            '''SELECT * FROM tempo_timeintervalset_forward(%s, %s, %s, %s)''',
+            (json.dumps(timeintervalset), start, n, trim)
         )
 
         return list(cursor.fetchall())
@@ -225,30 +225,34 @@ def timeintervalset_forward(request):
         raise NotImplemented
 
 
-@pytest.mark.parametrize('expression, start, expected', [
+@pytest.mark.parametrize('expression, start, trim, expected', [
     ([OR, [1, 15, 'day', 'month'], [15, 20, 'day', 'month']],
-     dt.datetime(2000, 1, 1),
+     dt.datetime(2000, 1, 1), True,
      [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 20)),
       (dt.datetime(2000, 2, 1), dt.datetime(2000, 2, 20))]),
     ([AND, [1, 15, 'day', 'month'], [10, 20, 'day', 'month']],
-     dt.datetime(2000, 1, 1),
+     dt.datetime(2000, 1, 1), True,
      [(dt.datetime(2000, 1, 10), dt.datetime(2000, 1, 15)),
       (dt.datetime(2000, 2, 10), dt.datetime(2000, 2, 15))]),
     ([AND, [1, 25, 'day', 'month'], [NOT, [10, 15, 'day', 'month']]],
-     dt.datetime(2000, 1, 1),
+     dt.datetime(2000, 1, 1), True,
      [(dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 10)),
       (dt.datetime(2000, 1, 15), dt.datetime(2000, 1, 25))]),
     ([AND, [1, 10, 'day', 'month'], [15, 20, 'day', 'month']],
-     dt.datetime(2000, 1, 1),
+     dt.datetime(2000, 1, 1), True,
      []),
     ([AND, [5, 10, 'day', 'month'], [15, 20, 'hour', 'day']],
-     dt.datetime(2000, 1, 1),
+     dt.datetime(2000, 1, 1), True,
      [(dt.datetime(2000, 1, 5, 15), dt.datetime(2000, 1, 5, 20)),
       (dt.datetime(2000, 2, 5, 15), dt.datetime(2000, 2, 5, 20))]),
+    ([OR, [5, 10, 'day', 'month']],
+     dt.datetime(2000, 1, 8), False,
+     [(dt.datetime(2000, 1, 5), dt.datetime(2000, 1, 10)),
+      (dt.datetime(2000, 2, 5), dt.datetime(2000, 2, 10)),]),
 ])
-def test_forward(expression, start, expected, timeintervalset_forward):
+def test_forward(expression, start, trim, expected, timeintervalset_forward):
     """Various forward() cases."""
-    actual = timeintervalset_forward(expression, start, len(expected))
+    actual = timeintervalset_forward(expression, start, trim, len(expected))
 
     assert actual == expected
 

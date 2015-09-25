@@ -234,7 +234,7 @@ class TimeIntervalSet(object):
 
         return _walk(self.expression, callback)
 
-    def forward(self, start):
+    def forward(self, start, trim=True):
         """Generates intervals according to the expression.
 
         Intervals never overlap.
@@ -244,6 +244,13 @@ class TimeIntervalSet(object):
         ----------
         start : datetime.datetime
             Inclusive start date.
+        trim : bool
+            If `True` (which is default), the starting point of a first
+            interval will always be equal to or greater than'start'.
+            Otherwise it will be equal to the point, where the interval
+            actually starts, which may be placed earlier in time, that
+            'start'.
+
 
         Yields
         ------
@@ -275,7 +282,7 @@ class TimeIntervalSet(object):
             for arg in args:
                 if isinstance(arg, TimeInterval):
                     arg = {
-                        'generator': arg.forward(start),
+                        'generator': arg.forward(start, trim),
                         'results': SparseInterval(),
                         'exhausted': False
                     }
@@ -325,6 +332,8 @@ class TimeIntervalSet(object):
             if (len(generated.intervals) == 0 and
                 all(e['exhausted'] for e in context['all'])):
                 return
+            if trim:
+                generated = generated.trim(start=start)
 
             # Has gap
             if len(generated.intervals) > 1:

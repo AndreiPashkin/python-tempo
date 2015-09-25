@@ -120,7 +120,9 @@ $$;
 -- TimeIntervalSet forward intervals as set of rows.
 CREATE OR REPLACE FUNCTION
   tempo_timeintervalset_forward(timeintervalset tempo_timeintervalset,
-                                start timestamp, n integer)
+                                start timestamp,
+                                n integer,
+                                clamp bool DEFAULT true)
 RETURNS TABLE(start timestamp, stop timestamp)
 IMMUTABLE
 LANGUAGE plpythonu
@@ -131,7 +133,8 @@ AS $$
 
     for interval in it.islice(TimeIntervalSet
                                   .from_json(timeintervalset)
-                                  .forward(parse_datetime(start)),
+                                  .forward(start=parse_datetime(start),
+                                           trim=clamp),
                               n):
         yield interval
 $$;

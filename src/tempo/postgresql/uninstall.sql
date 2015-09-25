@@ -4,7 +4,8 @@ DROP FUNCTION IF EXISTS tempo_timeintervalset_contains(
 );
 
 DROP FUNCTION IF EXISTS tempo_timeintervalset_forward(
-    timeintervalset tempo_timeintervalset, start timestamp, n integer
+    timeintervalset tempo_timeintervalset, start timestamp, n integer,
+    clamp bool DEFAULT true
 );
 
 DROP DOMAIN IF EXISTS tempo_timeintervalset;
