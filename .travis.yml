@@ -28,6 +28,21 @@ env:
     - TOX_ENV=py33-django18
     - TOX_ENV=py34-django17
     - TOX_ENV=py34-django18
+    - TOX_ENV=py27-rest_framework3
+    - TOX_ENV=py27-rest_framework31
+    - TOX_ENV=py27-rest_framework32
+    - TOX_ENV=py3-rest_framework3
+    - TOX_ENV=py3-rest_framework31
+    - TOX_ENV=py3-rest_framework32
+    - TOX_ENV=py32-rest_framework3
+    - TOX_ENV=py32-rest_framework31
+    - TOX_ENV=py32-rest_framework32
+    - TOX_ENV=py33-rest_framework3
+    - TOX_ENV=py33-rest_framework31
+    - TOX_ENV=py33-rest_framework32
+    - TOX_ENV=py34-rest_framework3
+    - TOX_ENV=py34-rest_framework31
+    - TOX_ENV=py34-rest_framework32
     - TOX_ENV=pep8
     - TOX_ENV=pylint
 script:
