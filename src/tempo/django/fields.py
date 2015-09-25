@@ -28,6 +28,8 @@ class TimeIntervalSetField(with_metaclass(models.SubfieldBase, models.Field)):
         # We only handle 'exact' and 'in'. All others are errors.
         if lookup_type == 'contains':
             return value.isoformat()
+        elif lookup_type == 'intersects':
+            return (value[0].isoformat(), value[1].isoformat())
         else:
             raise TypeError('Lookup type %r not supported.' % lookup_type)
 
@@ -53,3 +55,24 @@ class Contains(models.Lookup):
                 (self.rhs,))
 
 TimeIntervalSetField.register_lookup(Contains)
+
+
+class Intersects(models.Lookup):
+    """Checks a given time interval in form of a pair-tuple of ``datetime``
+    objects, intersects with time defined by time interval set in
+    given column."""
+    lookup_name = 'intersects'
+
+    def as_sql(self, compiler, connection):
+        lhs, _ = self.process_lhs(compiler, connection)
+        rhs, _ = self.process_rhs(compiler, connection)
+
+        start, stop = self.rhs
+
+        return ("""(SELECT bool_and(start < %s AND stop > %s) FROM
+                    tempo_timeintervalset_forward(
+                        %s::tempo_timeintervalset, %s::timestamp, 1
+                    ))
+                """ % (rhs, rhs, lhs, rhs), (stop, start, start))
+
+TimeIntervalSetField.register_lookup(Intersects)
