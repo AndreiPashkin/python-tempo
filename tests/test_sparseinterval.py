@@ -90,3 +90,21 @@ def test_eq_with_other_type():
     other = object()
 
     assert not (sparseinterval == other)
+
+
+@pytest.mark.parametrize('interval, trim, expected', [
+    ([(1, 20), (50, 100)], {'start': 10, 'stop': 60},
+     [(10, 20), (50, 60)]),
+    ([(1, 20), (50, 100)], {'stop': 60},
+     [(1, 20), (50, 60)]),
+    ([(1, 20), (50, 100)], {'start': 10},
+     [(10, 20), (50, 100)]),
+    ([], {'start': 10, 'stop': 100},
+     []),
+])
+def test_trim(interval, trim, expected):
+    """trim() cases."""
+    actual = SparseInterval(*interval).trim(**trim)
+    expected = SparseInterval(*expected)
+
+    assert actual == expected

@@ -1,6 +1,7 @@
 # coding=utf-8
 """Provides SparseInterval class."""
 import operator as op
+from itertools import chain, islice
 from collections import deque
 
 from six.moves import range  # pylint: disable=redefined-builtin
@@ -102,6 +103,30 @@ class SparseInterval(object):
                 intervals.append((a, b))
 
         return self.__class__(*intervals)
+
+    def trim(self, start=None, stop=None):
+        """Trims the intervals from the start and/or from the end by values
+        of respective arguments."""
+        intervals = self._intervals
+        if len(self._intervals) == 0:
+            return SparseInterval(*self._intervals)
+
+        first = None
+        last = None
+        slice_ = [None, None]
+        if start is not None and intervals[0][0] < start:
+            first = (start, intervals[0][1])
+            slice_[0] = 1
+
+        if stop is not None and intervals[-1][1] > stop:
+            last = (intervals[-1][0], stop)
+            slice_[1] = len(intervals) - 1
+
+        return SparseInterval(
+            *chain((first,) if first is not None else (),
+                   islice(intervals, *slice_),
+                   (last,) if last is not None else ())
+        )
 
     def __eq__(self, other):
         try:
