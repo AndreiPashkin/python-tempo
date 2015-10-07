@@ -1,13 +1,14 @@
 # coding=utf-8
 """Provides SparseInterval class."""
 import operator as op
-from itertools import chain, islice
+from itertools import chain, islice, combinations
 from collections import deque
 
 from six.moves import range  # pylint: disable=redefined-builtin
 
 
 class SparseInterval(object):
+
     """Non-contigous interval."""
     __slots__ = ['_intervals']
 
@@ -48,19 +49,6 @@ class SparseInterval(object):
 
         return intervals
 
-    @staticmethod
-    def _intersection(intervals):
-        """Finds intersections of sub-intervals of 'intervals' in-place.
-        Assumes that 'intervals' sorted by first component of sub-element."""
-        prev = intervals.pop(0)
-        for _ in range(0, len(intervals)):
-            cur = intervals.pop(0)
-            if prev[1] >= cur[0]:
-                intervals.append((max(prev[0], cur[0]), min(prev[1], cur[1])))
-            prev = cur
-
-        return intervals
-
     def union(self, other):
         """Produces interval, that contains space from both."""
         intervals = deque()
@@ -78,9 +66,16 @@ class SparseInterval(object):
         intervals = deque()
         intervals.extend(self._intervals)
         intervals.extend(other._intervals)  # pylint: disable=protected-access
-        intervals = sorted(intervals, key=op.itemgetter(0))
 
-        self._intersection(intervals)
+        if len(intervals) == 0:
+            return self.__class__()
+
+        new = deque()
+        for a, b in combinations(sorted(intervals, key=op.itemgetter(0)),
+                                 2):
+            if a[1] >= b[0]:
+                new.append((max(a[0], b[0]), min(a[1], b[1])))
+        intervals = new
 
         return self.__class__(*intervals)
 

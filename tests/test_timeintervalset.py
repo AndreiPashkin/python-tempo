@@ -244,7 +244,7 @@ def timeintervalset_forward(request):
     ([AND, [5, 10, 'day', 'month'], [15, 20, 'hour', 'day']],
      dt.datetime(2000, 1, 1), True,
      [(dt.datetime(2000, 1, 5, 15), dt.datetime(2000, 1, 5, 20)),
-      (dt.datetime(2000, 2, 5, 15), dt.datetime(2000, 2, 5, 20))]),
+      (dt.datetime(2000, 1, 6, 15), dt.datetime(2000, 1, 6, 20))]),
     ([OR, [5, 10, 'day', 'month']],
      dt.datetime(2000, 1, 8), False,
      [(dt.datetime(2000, 1, 5), dt.datetime(2000, 1, 10)),
