@@ -6,12 +6,12 @@ from six import string_types
 
 from rest_framework import serializers
 
-from tempo.timeintervalset import TimeIntervalSet
+from tempo.recurrenteventset import RecurrentEventSet
 
 
 # pylint: disable=no-init,no-self-use,no-member
-class TimeIntervalSetField(serializers.Field):
-    """Representation of TimeIntervalSet."""
+class RecurrentEventSetField(serializers.Field):
+    """Representation of RecurrentEventSet."""
     default_error_messages = {
         'incorrect_type': 'Incorrect type. Expected a string or list/tuple, '
                           'but got {input_type}',
@@ -25,7 +25,7 @@ class TimeIntervalSetField(serializers.Field):
         # pylint: disable=missing-docstring
         if not isinstance(data, (string_types, list, tuple)):
             self.fail('incorrect_type', input_type=type(data).__name__)
-        if not TimeIntervalSet.validate_json(data):
+        if not RecurrentEventSet.validate_json(data):
             self.fail('incorrect_format')
 
-        return TimeIntervalSet.from_json(data)
+        return RecurrentEventSet.from_json(data)

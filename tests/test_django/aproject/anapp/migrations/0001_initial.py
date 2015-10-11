@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='AModel',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('schedule', tempo.django.fields.TimeIntervalSetField(verbose_name=b'Schedule')),
+                ('schedule', tempo.django.fields.RecurrentEventSetField(verbose_name=b'Schedule')),
             ],
             options={
             },

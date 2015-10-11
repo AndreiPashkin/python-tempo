@@ -1,3 +1,4 @@
+
 # coding=utf-8
 import datetime as dt
 import json
@@ -6,9 +7,9 @@ import itertools as it
 
 import pytest
 
-from tempo.timeinterval import TimeInterval
+from tempo.recurrentevent import RecurrentEvent
 
-from tempo.timeintervalset import (AND, NOT, OR, _walk, TimeIntervalSet, Void)
+from tempo.recurrenteventset import (AND, NOT, OR, _walk, RecurrentEventSet, Void)
 from tempo.unit import Unit
 from tests import Implementation
 
@@ -61,22 +62,22 @@ def test_walk_raises_void():
 
 
 @pytest.mark.parametrize('first, second, expected', [
-    (TimeIntervalSet((AND,
-        TimeInterval(0, 5, 'hour', 'day'),
-        (NOT, TimeInterval(2, 3, 'hour', 'day'))
+    (RecurrentEventSet((AND,
+        RecurrentEvent(0, 5, 'hour', 'day'),
+        (NOT, RecurrentEvent(2, 3, 'hour', 'day'))
      )),
-     TimeIntervalSet((AND,
-        TimeInterval(0, 5, 'hour', 'day'),
-        (NOT, TimeInterval(2, 3, 'hour', 'day'))
+     RecurrentEventSet((AND,
+        RecurrentEvent(0, 5, 'hour', 'day'),
+        (NOT, RecurrentEvent(2, 3, 'hour', 'day'))
      )),
      True),
-    (TimeIntervalSet((AND,
-        TimeInterval(0, 5, 'hour', 'day'),
-        (NOT, TimeInterval(2, 3, 'hour', 'day'))
+    (RecurrentEventSet((AND,
+        RecurrentEvent(0, 5, 'hour', 'day'),
+        (NOT, RecurrentEvent(2, 3, 'hour', 'day'))
      )),
-     TimeIntervalSet((AND,
-        TimeInterval(0, 5, 'hour', 'day'),
-        (NOT, TimeInterval(2, 4, 'hour', 'day'))
+     RecurrentEventSet((AND,
+        RecurrentEvent(0, 5, 'hour', 'day'),
+        (NOT, RecurrentEvent(2, 4, 'hour', 'day'))
      )),
      False),
 ])
@@ -91,35 +92,35 @@ def test_eq_hash(first, second, expected):
 def test_eq_with_other_type():
     """Equality for object with othery type should not throw exceptions
     and return False."""
-    timeintervalset = TimeIntervalSet.from_json([AND, 0, 10, 'hour', 'day'])
+    recurrenteventset = RecurrentEventSet.from_json([AND, 0, 10, 'hour', 'day'])
     other = object()
 
-    assert not (timeintervalset == other)
+    assert not (recurrenteventset == other)
 
 
 def pg_contains(item, expression, connection):
-    """PostgreSQL binding TimeIntervalSet containment test
+    """PostgreSQL binding RecurrentEventSet containment test
     implementation."""
     if isinstance(item, tuple):
         item = list(item)
 
-    timeintervalset = TimeIntervalSet(expression).to_json()
+    recurrenteventset = RecurrentEventSet(expression).to_json()
     with connection.cursor() as cursor:
         cursor.execute(
-            '''SELECT tempo_timeintervalset_contains(%s, %s)''',
-            (json.dumps(timeintervalset), item)
+            '''SELECT tempo_recurrenteventset_contains(%s, %s)''',
+            (json.dumps(recurrenteventset), item)
         )
         return cursor.fetchone()[0]
 
 
 def py_contains(item, expression):
-    """Python TimeIntervalSet containment test
+    """Python RecurrentEventSet containment test
     implementation."""
-    return item in TimeIntervalSet(expression)
+    return item in RecurrentEventSet(expression)
 
 
 @pytest.fixture(params=Implementation.values())
-def timeintervalset_contains(request):
+def recurrenteventset_contains(request):
     if request.param == Implementation.PYTHON:
         return py_contains
     elif request.param == Implementation.POSTGRESQL:
@@ -133,87 +134,87 @@ def timeintervalset_contains(request):
 
 @pytest.mark.parametrize('item, expression, expected', [
     (dt.datetime(2005, 5, 15),
-     (AND, TimeInterval(2, 8, 'month', 'year')),
+     (AND, RecurrentEvent(2, 8, 'month', 'year')),
      True),
     (dt.datetime(2005, 12, 15),
-     (AND, TimeInterval(2, 8, 'month', 'year')),
+     (AND, RecurrentEvent(2, 8, 'month', 'year')),
      False),
     (dt.datetime(2005, 5, 15),
-     (AND, TimeInterval(2, 8, 'month', 'year'),
-            (NOT, TimeInterval(4, 5, 'month', 'year'))),
+     (AND, RecurrentEvent(2, 8, 'month', 'year'),
+            (NOT, RecurrentEvent(4, 5, 'month', 'year'))),
      True),
 ])
-def test_contains(item, expression, expected, timeintervalset_contains):
+def test_contains(item, expression, expected, recurrenteventset_contains):
     """Cases for containment test."""
-    assert timeintervalset_contains(item, expression) == expected
+    assert recurrenteventset_contains(item, expression) == expected
 
 
-@pytest.mark.parametrize('timeintervalset, expected', [
-    (TimeIntervalSet(
-        [AND, TimeInterval(1, 15, Unit.YEAR, None)]
+@pytest.mark.parametrize('recurrenteventset, expected', [
+    (RecurrentEventSet(
+        [AND, RecurrentEvent(1, 15, Unit.YEAR, None)]
      ),
      [AND, [1, 15, 'year', None]]),
-    (TimeIntervalSet(
-        [AND, TimeInterval(1, 25, Unit.DAY, Unit.WEEK)]
+    (RecurrentEventSet(
+        [AND, RecurrentEvent(1, 25, Unit.DAY, Unit.WEEK)]
      ),
      [AND, [1, 25, 'day', 'week']]),
-    (TimeIntervalSet(
-         [AND, TimeInterval(5, 25, Unit.YEAR, None),
-          [NOT, TimeInterval(10, 15, 'year', None)]]
+    (RecurrentEventSet(
+         [AND, RecurrentEvent(5, 25, Unit.YEAR, None),
+          [NOT, RecurrentEvent(10, 15, 'year', None)]]
      ),
      [AND, [5, 25, 'year', None], [NOT, [10, 15, 'year', None]]]),
 ])
-def test_to_json(timeintervalset, expected):
+def test_to_json(recurrenteventset, expected):
     """Cases for `to_json()` method."""
-    actual = timeintervalset.to_json()
+    actual = recurrenteventset.to_json()
 
     assert actual == expected
 
 
 @pytest.mark.parametrize('value, expected', [
     (json.dumps([AND, [0, 15, 'day', 'week']]),
-     TimeIntervalSet(
-         [AND, TimeInterval(0, 15, Unit.DAY, Unit.WEEK)]
+     RecurrentEventSet(
+         [AND, RecurrentEvent(0, 15, Unit.DAY, Unit.WEEK)]
      )),
     (json.dumps([AND, [5, 25, 'year', None]]),
-     TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
+     RecurrentEventSet([AND, RecurrentEvent(5, 25, Unit.YEAR, None)])),
     ([AND, [5, 25, 'year', None]],
-     TimeIntervalSet([AND, TimeInterval(5, 25, Unit.YEAR, None)])),
+     RecurrentEventSet([AND, RecurrentEvent(5, 25, Unit.YEAR, None)])),
     ([AND, [5, 25, 'year', None], [NOT, [10, 15, 'year', None]]],
-     TimeIntervalSet(
-         [AND, TimeInterval(5, 25, Unit.YEAR, None),
-          [NOT, TimeInterval(10, 15, 'year', None)]]
+     RecurrentEventSet(
+         [AND, RecurrentEvent(5, 25, Unit.YEAR, None),
+          [NOT, RecurrentEvent(10, 15, 'year', None)]]
      ))
 ])
 def test_from_json(value, expected):
     """Cases for `from_json()` method."""
-    actual = TimeIntervalSet.from_json(value)
+    actual = RecurrentEventSet.from_json(value)
 
     assert actual == expected
 
 
 def py_forward(expression, start, trim, n):
-    """Python API for TimeIntervalSet.forward()"""
-    return list(it.islice(TimeIntervalSet.from_json(expression)
+    """Python API for RecurrentEventSet.forward()"""
+    return list(it.islice(RecurrentEventSet.from_json(expression)
                                          .forward(start, trim), n))
 
 
 def pg_forward(expression, start, trim, n, connection):
-    """PostgreSQL API for TimeIntervalSet.forward()."""
+    """PostgreSQL API for RecurrentEventSet.forward()."""
 
-    timeintervalset = TimeIntervalSet.from_json(expression).to_json()
+    recurrenteventset = RecurrentEventSet.from_json(expression).to_json()
     with connection.cursor() as cursor:
         cursor.execute(
-            '''SELECT * FROM tempo_timeintervalset_forward(%s, %s, %s, %s)''',
-            (json.dumps(timeintervalset), start, n, trim)
+            '''SELECT * FROM tempo_recurrenteventset_forward(%s, %s, %s, %s)''',
+            (json.dumps(recurrenteventset), start, n, trim)
         )
 
         return list(cursor.fetchall())
 
 
 @pytest.fixture(params=Implementation.values())
-def timeintervalset_forward(request):
-    """Various APIs for TimeIntervalSet.forwars()."""
+def recurrenteventset_forward(request):
+    """Various APIs for RecurrentEventSet.forwars()."""
     if request.param == Implementation.PYTHON:
         return py_forward
     elif request.param == Implementation.POSTGRESQL:
@@ -249,11 +250,20 @@ def timeintervalset_forward(request):
      dt.datetime(2000, 1, 8), False,
      [(dt.datetime(2000, 1, 5), dt.datetime(2000, 1, 10)),
       (dt.datetime(2000, 2, 5), dt.datetime(2000, 2, 10)),]),
+    ((OR,
+        (AND, [1, 4, 'day', 'week'], [10, 19, 'hour', 'day']),
+        (AND, [5, 6, 'day', 'week'], [10, 16, 'hour', 'day'])),
+     dt.datetime(2000, 1, 1), False,
+     [(dt.datetime(2000, 1, 3, 10, 0), dt.datetime(2000, 1, 3, 19, 0)),
+      (dt.datetime(2000, 1, 4, 10, 0), dt.datetime(2000, 1, 4, 19, 0)),
+      (dt.datetime(2000, 1, 5, 10, 0), dt.datetime(2000, 1, 5, 19, 0))])
 ])
-def test_forward(expression, start, trim, expected, timeintervalset_forward):
+def test_forward(expression, start, trim, expected, recurrenteventset_forward):
     """Various forward() cases."""
-    actual = timeintervalset_forward(expression, start, trim, len(expected))
+    actual = recurrenteventset_forward(expression, start, trim, len(expected))
 
+    print(actual)
+    print(expected)
     assert actual == expected
 
 
@@ -263,5 +273,5 @@ def test_forward(expression, start, trim, expected, timeintervalset_forward):
     ('["AND", [1, 2, "month", "year"]]', True),
 ])
 def test_validate_json(expression, expected):
-    """Cases for TimeIntervalSet.validate_json()."""
-    assert TimeIntervalSet.validate_json(expression) == expected
+    """Cases for RecurrentEventSet.validate_json()."""
+    assert RecurrentEventSet.validate_json(expression) == expected

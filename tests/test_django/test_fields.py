@@ -5,7 +5,7 @@ import datetime as dt
 import pytest
 
 from tests.test_django.aproject.anapp.models import AModel, NullableModel
-from tempo.timeintervalset import TimeIntervalSet
+from tempo.recurrenteventset import RecurrentEventSet
 
 
 @pytest.mark.django_db
@@ -16,8 +16,8 @@ from tempo.timeintervalset import TimeIntervalSet
 ])
 def test_contains(expression, datetime, expected):
     """'contains' lookup."""
-    timeintervalset = TimeIntervalSet.from_json(expression)
-    expected_object = AModel.objects.create(schedule=timeintervalset)
+    recurrenteventset = RecurrentEventSet.from_json(expression)
+    expected_object = AModel.objects.create(schedule=recurrenteventset)
 
     objects = AModel.objects.filter(schedule__contains=datetime)
 
@@ -39,8 +39,8 @@ def test_contains(expression, datetime, expected):
 ])
 def test_intersects(expression, start, stop, expected):
     """'intersects' lookup."""
-    timeintervalset = TimeIntervalSet.from_json(expression)
-    expected_object = AModel.objects.create(schedule=timeintervalset)
+    recurrenteventset = RecurrentEventSet.from_json(expression)
+    expected_object = AModel.objects.create(schedule=recurrenteventset)
 
     objects = AModel.objects.filter(schedule__intersects=(start, stop))
 
@@ -68,8 +68,8 @@ def test_intersects(expression, start, stop, expected):
 ])
 def test_occurs_within(expression, start, stop, expected):
     """'occurs_within' lookup."""
-    timeintervalset = TimeIntervalSet.from_json(expression)
-    expected_object = AModel.objects.create(schedule=timeintervalset)
+    recurrenteventset = RecurrentEventSet.from_json(expression)
+    expected_object = AModel.objects.create(schedule=recurrenteventset)
 
     objects = AModel.objects.filter(schedule__occurs_within=(start, stop))
 

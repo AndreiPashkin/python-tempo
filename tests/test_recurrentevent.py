@@ -7,7 +7,7 @@ from itertools import islice, chain
 import pytest
 from six.moves import range
 
-from tempo.timeinterval import Unit as U, TimeInterval
+from tempo.recurrentevent import Unit as U, RecurrentEvent
 from tempo.timeutils import add_delta, delta, floor
 from tempo.unit import MIN, MAX, BASE
 
@@ -94,16 +94,16 @@ from tests.utils import randuniq, CASES, unit_span, guess, sample
 ])
 def test_containment(unit, recurrence, interval, datetime, expected):
     """Various cases of containment test."""
-    timeinterval = TimeInterval(interval[0], interval[1], unit, recurrence)
+    recurrentevent = RecurrentEvent(interval[0], interval[1], unit, recurrence)
 
-    assert (datetime in timeinterval) == expected
+    assert (datetime in recurrentevent) == expected
 
 
 @pytest.mark.parametrize('first, second, expected', [
-    (TimeInterval(0, 10, U.MINUTE, U.HOUR),
-     TimeInterval(0, 10, U.MINUTE, U.HOUR), True),
-    (TimeInterval(0, 10, U.MINUTE, U.HOUR),
-     TimeInterval(0, 10, U.MINUTE, U.YEAR), False),
+    (RecurrentEvent(0, 10, U.MINUTE, U.HOUR),
+     RecurrentEvent(0, 10, U.MINUTE, U.HOUR), True),
+    (RecurrentEvent(0, 10, U.MINUTE, U.HOUR),
+     RecurrentEvent(0, 10, U.MINUTE, U.YEAR), False),
 ])
 def test_eq_hash(first, second, expected):
     """Cases for equality test and hashing."""
@@ -116,10 +116,10 @@ def test_eq_hash(first, second, expected):
 def test_eq_with_other_type():
     """Equality for object with othery type should not throw exceptions
     and return False."""
-    timeinterval = TimeInterval(0, 10, U.MINUTE, U.HOUR)
+    recurrentevent = RecurrentEvent(0, 10, U.MINUTE, U.HOUR)
     other = object()
 
-    assert not (timeinterval == other)
+    assert not (recurrentevent == other)
 
 
 @pytest.mark.parametrize('interval, unit, recurrence, start, trim, expected', [
@@ -153,9 +153,9 @@ def test_eq_with_other_type():
 def test_forward_corner_cases(interval, unit, recurrence, start, trim,
                               expected):
     """Corner cases for `forward()` method."""
-    timeinterval = TimeInterval(start=interval[0], stop=interval[1],
+    recurrentevent = RecurrentEvent(start=interval[0], stop=interval[1],
                                 unit=unit, recurrence=recurrence)
-    actual = list(islice((e for e in timeinterval.forward(start, trim)),
+    actual = list(islice((e for e in recurrentevent.forward(start, trim)),
                          len(expected)))
 
     assert actual == expected
@@ -199,8 +199,8 @@ def test_forward_non_recurrent_random(unit, overlap, trim):
 
     expected = [(expected_start, stop)]
 
-    timeinterval = TimeInterval(interval[0], interval[1], unit, None)
-    actual = list(islice(timeinterval.forward(start, trim), None, N))
+    recurrentevent = RecurrentEvent(interval[0], interval[1], unit, None)
+    actual = list(islice(recurrentevent.forward(start, trim), None, N))
 
     assert actual == expected
 
@@ -259,8 +259,8 @@ def test_forward_recurrent_random(unit, recurrence, overlap, trim):
         expected.append((first, second))
         start = floor(add_delta(recurrence_start, 1, recurrence), recurrence)
 
-    timeinterval = TimeInterval(from_, to, unit, recurrence)
-    actual = list(islice(timeinterval.forward(initial, trim), None, N))
+    recurrentevent = RecurrentEvent(from_, to, unit, recurrence)
+    actual = list(islice(recurrentevent.forward(initial, trim), None, N))
 
     assert actual == expected
 
@@ -271,21 +271,21 @@ def test_forward_recurrent_random(unit, recurrence, overlap, trim):
 ])
 def test_to_json(interval, unit, recurrence, expected):
     """Cases for `to_json()` method."""
-    actual = TimeInterval(interval[0], interval[1], unit, recurrence).to_json()
+    actual = RecurrentEvent(interval[0], interval[1], unit, recurrence).to_json()
 
     assert actual == expected
 
 
 @pytest.mark.parametrize('value, expected', [
     (json.dumps([1, 15, 'year', None]),
-     TimeInterval(1, 15, U.YEAR, None)),
+     RecurrentEvent(1, 15, U.YEAR, None)),
     (json.dumps([1, 15, 'month', 'year']),
-     TimeInterval(1, 15, U.MONTH, U.YEAR)),
+     RecurrentEvent(1, 15, U.MONTH, U.YEAR)),
     ([1, 15, 'month', 'year'],
-     TimeInterval(1, 15, U.MONTH, U.YEAR)),
+     RecurrentEvent(1, 15, U.MONTH, U.YEAR)),
 ])
 def test_from_json(value, expected):
     """Cases for `from_json()` method."""
-    actual = TimeInterval.from_json(value)
+    actual = RecurrentEvent.from_json(value)
 
     assert actual == expected

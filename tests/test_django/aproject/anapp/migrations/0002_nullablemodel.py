@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name='NullableModel',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('schedule', tempo.django.fields.TimeIntervalSetField(null=True, verbose_name=b'Schedule', blank=True)),
+                ('schedule', tempo.django.fields.RecurrentEventSetField(null=True, verbose_name=b'Schedule', blank=True)),
             ],
         ),
     ]

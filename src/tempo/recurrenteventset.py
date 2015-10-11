@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Provides TimeIntervalSet class."""
+"""Provides RecurrentEventSet class."""
 import itertools as it
 from collections import deque
 import json
@@ -7,7 +7,7 @@ import json
 from six import string_types
 from six.moves import reduce  # pylint: disable=redefined-builtin
 
-from tempo.timeinterval import TimeInterval
+from tempo.recurrentevent import RecurrentEvent
 from tempo.sparseinterval import SparseInterval
 from tempo.unit import MIN, MAX, Unit
 
@@ -140,7 +140,7 @@ def _walk(expression, callback):
         raise Void
 
 
-class TimeIntervalSet(object):
+class RecurrentEventSet(object):
     """A set of time intervals, combined with a set logic operators:
     AND, OR and NOT.
 
@@ -148,13 +148,13 @@ class TimeIntervalSet(object):
     ----------
     expression : tuple
         A nested expression, composed of operators and arguments, which
-        are `TimeInterval` instances or sub-expressions.
+        are `RecurrentEvent` instances or sub-expressions.
         Example of an expression::
 
             (AND,
-                TimeInterval(Interval(10, 19), 'hour', 'day'),
-                (NOT, TimeInterval(Interval(14, 15), 'hour', 'day')),
-                (NOT, TimeInterval(Interval(6, 7), 'day', 'week')),
+                RecurrentEvent(Interval(10, 19), 'hour', 'day'),
+                (NOT, RecurrentEvent(Interval(14, 15), 'hour', 'day')),
+                (NOT, RecurrentEvent(Interval(6, 7), 'day', 'week')),
             ])
 
         It means: 'From 10:00 to 19:00 every day, except from
@@ -164,7 +164,7 @@ class TimeIntervalSet(object):
         self.expression = expression
 
     def __str__(self):
-        return 'TimeIntervalSet({})'.format(repr(self.expression))
+        return 'RecurrentEventSet({})'.format(repr(self.expression))
 
     def __repr__(self):
         return self.__str__()
@@ -210,7 +210,7 @@ class TimeIntervalSet(object):
         return hash(tuple(sample))
 
     def __contains__(self, item):
-        """Containment test. Accepts whatever TimeInterval can
+        """Containment test. Accepts whatever RecurrentEvent can
         test for containment.
         """
         def callback(operator, *args):
@@ -261,7 +261,7 @@ class TimeIntervalSet(object):
         -----
         The alghorithm is simple:
 
-            1. It generates intervals from TimeInterval instances and
+            1. It generates intervals from RecurrentEvent instances and
                applies set logic operators on them.
             2. Checks if resulting interval has gap.
             3. Checks if there is a possibility, that this gap will gone,
@@ -277,10 +277,10 @@ class TimeIntervalSet(object):
         }
 
         def prepare(operator, *args):
-            """Initializes forward() generators of TimeIntervals."""
+            """Initializes forward() generators of recurrentevents."""
             prepared = [operator]
             for arg in args:
-                if isinstance(arg, TimeInterval):
+                if isinstance(arg, RecurrentEvent):
                     arg = {
                         'generator': arg.forward(start, trim),
                         'results': SparseInterval(),
@@ -297,7 +297,7 @@ class TimeIntervalSet(object):
 
         def generate(operator, *args):
             """Generates SparseInterval instance current and past
-            results of TimeInterval.forward() generators with respect
+            results of RecurrentEvent.forward() generators with respect
             to 'operator' of given expression."""
             operands = []
             for arg in args:
@@ -341,9 +341,8 @@ class TimeIntervalSet(object):
                     last_date = generated.intervals[0][1]
 
                 for item in context['all']:
-                    if len(item['results'].intervals) == 0:
-                        continue
-                    if (item['results'].intervals[-1][1] < last_date and
+                    if ((len(item['results'].intervals) == 0 or
+                         item['results'].intervals[-1][1] < last_date) and
                         not item['exhausted']):
                         break
                 else:
@@ -357,13 +356,13 @@ class TimeIntervalSet(object):
         """Converts arguments that are time intervals to JSON."""
         result = [operator]
         for arg in args:
-            if isinstance(arg, TimeInterval):
+            if isinstance(arg, RecurrentEvent):
                 arg = arg.to_json()
             result.append(arg)
         return result
 
     def to_json(self):
-        """Exports `TimeIntervalSet` instance to JSON serializable
+        """Exports `RecurrentEventSet` instance to JSON serializable
         representation."""
         return _walk(self.expression, self.to_json_callback)
 
@@ -373,7 +372,7 @@ class TimeIntervalSet(object):
         result = [operator]
         for arg in args:
             if isinstance(arg, (list, tuple)):
-                arg = TimeInterval.from_json(arg)
+                arg = RecurrentEvent.from_json(arg)
             elif isinstance(arg, Result):
                 arg = arg.value
             result.append(arg)
@@ -381,7 +380,7 @@ class TimeIntervalSet(object):
 
     @classmethod
     def from_json(cls, value):
-        """Constructs `TimeIntervalSet` instance from JSON serializable
+        """Constructs `RecurrentEventSet` instance from JSON serializable
         representation or from JSON string."""
         if not isinstance(value, (tuple, list)):
             value = json.loads(value)

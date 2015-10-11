@@ -1,10 +1,10 @@
 from django.db import models
-from tempo.django.fields import TimeIntervalSetField
+from tempo.django.fields import RecurrentEventSetField
 
 
 class AModel(models.Model):
-    schedule = TimeIntervalSetField("Schedule")
+    schedule = RecurrentEventSetField("Schedule")
 
 
 class NullableModel(models.Model):
-    schedule = TimeIntervalSetField("Schedule", null=True, blank=True)
+    schedule = RecurrentEventSetField("Schedule", null=True, blank=True)

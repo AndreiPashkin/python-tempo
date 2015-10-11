@@ -1,5 +1,5 @@
 # coding=utf-8
-"""Provides TimeInterval class."""
+"""Provides RecurrentEvent class."""
 import json
 
 from tempo.timeutils import delta, floor, add_delta
@@ -7,7 +7,7 @@ from tempo.timeutils import delta, floor, add_delta
 from tempo.unit import Unit, ORDER, MIN, MAX, BASE, UNITS_MAX
 
 
-class TimeInterval(object):
+class RecurrentEvent(object):
     """An interval of time expressed in some 'unit' of time
     (second, week, year, etc), recurring with some 'recurrence',
     also expressed in some unit of time.
@@ -34,10 +34,10 @@ class TimeInterval(object):
     Examples
     --------
     >>> from datetime import datetime
-    >>> timeinterval = TimeInterval(0, 15, Unit.SECOND, Unit.MINUTE)
-    >>> datetime(2000, 1, 1, 5, 3, 10) in timeinterval
+    >>> recurrentevent = RecurrentEvent(0, 15, Unit.SECOND, Unit.MINUTE)
+    >>> datetime(2000, 1, 1, 5, 3, 10) in recurrentevent
     ... True
-    >>> datetime(2000, 1, 1, 5, 3, 16) in timeinterval
+    >>> datetime(2000, 1, 1, 5, 3, 16) in recurrentevent
     ... False
     """
 
@@ -54,7 +54,7 @@ class TimeInterval(object):
         self.stop = stop
 
     def __contains__(self, item):
-        """Test given datetime 'item' for containment in the time interval.
+        """Test given datetime 'item' for containment in the recurrent event.
 
         Parameters
         ----------
@@ -111,7 +111,7 @@ class TimeInterval(object):
         return hash((self.start, self.stop, self.unit, self.recurrence))
 
     def __str__(self):
-        return ('TimeInterval({start}, {stop}, {unit}, {recurrence})'
+        return ('RecurrentEvent({start}, {stop}, {unit}, {recurrence})'
                 .format(start=repr(self.start), stop=repr(self.stop),
                         unit=repr(self.unit),
                         recurrence=repr(self.recurrence)))
@@ -124,7 +124,7 @@ class TimeInterval(object):
         return [min(d, max_) for d in dates]
 
     def isgapless(self):
-        """Tests if the TimeInterval instance defines
+        """Tests if the RecurrentEvent instance defines
         infinite time interval."""
         if self.recurrence is None:
             return False
@@ -215,13 +215,13 @@ class TimeInterval(object):
                 return
 
     def to_json(self):
-        """Exports `TimeInterval` instance to JSON serializable
+        """Exports `RecurrentEvent` instance to JSON serializable
         representation."""
         return [self.start, self.stop, self.unit, self.recurrence]
 
     @classmethod
     def from_json(cls, value):
-        """Constructs `TimeInterval` instance from JSON serializable
+        """Constructs `RecurrentEvent` instance from JSON serializable
         representation or from JSON string."""
         if not isinstance(value, (list, tuple)):
             value = json.loads(value)

@@ -1,12 +1,12 @@
 # coding=utf-8
 from rest_framework import serializers
 
-from tempo.rest_framework.serializers import TimeIntervalSetField
-from tempo.timeintervalset import TimeIntervalSet
+from tempo.rest_framework.serializers import RecurrentEventSetField
+from tempo.recurrenteventset import RecurrentEventSet
 
 
 class ASerializer(serializers.Serializer):
-    schedule = TimeIntervalSetField()
+    schedule = RecurrentEventSetField()
 
 class AnObject:
     def __init__(self, schedule):
@@ -14,24 +14,24 @@ class AnObject:
 
 
 def test_serialize():
-    timeintervalset = TimeIntervalSet.from_json(
+    recurrenteventset = RecurrentEventSet.from_json(
         ['AND', [1, 10, 'day', 'month']]
     )
-    obj = AnObject(timeintervalset)
+    obj = AnObject(recurrenteventset)
 
     serializer = ASerializer(obj)
 
-    expected = {'schedule': timeintervalset.to_json()}
+    expected = {'schedule': recurrenteventset.to_json()}
     actual = serializer.data
 
     assert actual == expected
 
 
 def test_deserialize():
-    expected = timeintervalset = TimeIntervalSet.from_json(
+    expected = recurrenteventset = RecurrentEventSet.from_json(
         ['AND', [1, 10, 'day', 'month']]
     )
-    serializer = ASerializer(data={'schedule': timeintervalset.to_json()})
+    serializer = ASerializer(data={'schedule': recurrenteventset.to_json()})
 
     assert serializer.is_valid()
     actual = serializer.validated_data['schedule']

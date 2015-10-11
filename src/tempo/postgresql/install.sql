@@ -28,7 +28,7 @@ CONSTRAINT is_unit_check CHECK (
 
 -- Checks if given jsonb is a valid time interval.
 -- The format is [[1, 15], "month", "year"].
-CREATE OR REPLACE FUNCTION tempo_is_timeinterval(item jsonb)
+CREATE OR REPLACE FUNCTION tempo_is_recurrentevent(item jsonb)
 RETURNS boolean
 IMMUTABLE
 LANGUAGE plpgsql
@@ -55,14 +55,14 @@ BEGIN
 END;
 $$;
 
--- Type for TimeInterval.
-CREATE DOMAIN tempo_timeinterval AS jsonb
-CONSTRAINT is_timeinterval_check CHECK (tempo_is_timeinterval(VALUE));
+-- Type for RecurrentEvent.
+CREATE DOMAIN tempo_recurrentevent AS jsonb
+CONSTRAINT is_recurrentevent_check CHECK (tempo_is_recurrentevent(VALUE));
 
 
--- Checks if given jsonb is a valid timeintervalset.
+  -- Checks if given jsonb is a valid recurrenteventset.
 -- The format is ["AND", [[1, 15], "month", "year"]].
-CREATE OR REPLACE FUNCTION tempo_is_timeintervalset(item jsonb)
+CREATE OR REPLACE FUNCTION tempo_is_recurrenteventset(item jsonb)
 RETURNS boolean
 IMMUTABLE
 LANGUAGE plpgsql
@@ -87,7 +87,7 @@ BEGIN
     FOR e IN SELECT jsonb_array_elements(cur) LOOP
       IF jsonb_typeof(e) = 'array' AND (e -> 0) = ANY (OPS) THEN
         queued := array_append(queued, e);
-      ELSIF NOT (tempo_is_timeinterval(e)) THEN
+      ELSIF NOT (tempo_is_recurrentevent(e)) THEN
         RETURN false;
       END IF;
     END LOOP;
@@ -96,43 +96,43 @@ BEGIN
 END
 $$;
 
--- Type for TimeIntervalSet.
-CREATE DOMAIN tempo_timeintervalset AS jsonb
-CONSTRAINT is_timeintervalset_check CHECK (tempo_is_timeintervalset(VALUE));
+-- Type for recurrenteventset.
+CREATE DOMAIN tempo_recurrenteventset AS jsonb
+CONSTRAINT is_recurrenteventset_check CHECK (tempo_is_recurrenteventset(VALUE));
 
 
--- TimeIntervalSet containment test for a single datetime.
+-- recurrenteventset containment test for a single datetime.
 CREATE OR REPLACE FUNCTION
-  tempo_timeintervalset_contains(timeintervalset tempo_timeintervalset,
-                                 datetime timestamp)
+  tempo_recurrenteventset_contains(recurrenteventset tempo_recurrenteventset,
+                                   datetime timestamp)
 RETURNS boolean
 IMMUTABLE
 LANGUAGE plpythonu
 AS $$
     from ciso8601 import parse_datetime
-    from tempo.timeintervalset import TimeIntervalSet
+    from tempo.recurrenteventset import RecurrentEventSet
 
     return (parse_datetime(datetime) in
-            TimeIntervalSet.from_json(timeintervalset))
+            RecurrentEventSet.from_json(recurrenteventset))
 $$;
 
 
--- TimeIntervalSet forward intervals as set of rows.
+-- recurrenteventset forward intervals as set of rows.
 CREATE OR REPLACE FUNCTION
-  tempo_timeintervalset_forward(timeintervalset tempo_timeintervalset,
-                                start timestamp,
-                                n integer,
-                                clamp bool DEFAULT true)
+  tempo_recurrenteventset_forward(recurrenteventset tempo_recurrenteventset,
+                                  start timestamp,
+                                  n integer,
+                                  clamp bool DEFAULT true)
 RETURNS TABLE(start timestamp, stop timestamp)
 IMMUTABLE
 LANGUAGE plpythonu
 AS $$
     import itertools as it
     from ciso8601 import parse_datetime
-    from tempo.timeintervalset import TimeIntervalSet
+    from tempo.recurrenteventset import RecurrentEventSet
 
-    for interval in it.islice(TimeIntervalSet
-                                  .from_json(timeintervalset)
+    for interval in it.islice(RecurrentEventSet
+                                  .from_json(recurrenteventset)
                                   .forward(start=parse_datetime(start),
                                            trim=clamp),
                               n):
