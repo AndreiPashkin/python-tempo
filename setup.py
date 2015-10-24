@@ -4,6 +4,27 @@
 from setuptools import setup, find_packages
 
 
+CLASSIFIERS = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python',
+    'Operating System :: MacOS :: MacOS X',
+    'Operating System :: Microsoft :: Windows',
+    'Operating System :: POSIX',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.2',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Database',
+    'Topic :: Utilities',
+]
+
+
 def read_requirements(filename):
     """Returns requirements specs from file with given 'filename'
     as list."""
@@ -17,6 +38,8 @@ setup(
     author="Andrew Pashkin",
     author_email="andrew.pashkin@gmx.co.uk",
     license="BSD",
+    url='https://github.com/AndrewPashkin/python-tempo/',
+    classifiers=CLASSIFIERS,
     packages=find_packages(where='src', include=['tempo', 'tempo.*']),
     package_dir={'': 'src'},
     extras_require={
