@@ -83,6 +83,23 @@ def test_occurs_within(expression, start, stop, expected):
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures('django_postgresql_tempo')
+def test_json_form():
+    """RecurrentEventSetField's lookups accepts JSON form of values."""
+    expected_object = AModel.objects.create(
+      schedule=["OR", [10, 20, "day", "month"]]
+    )
+
+    interval = (dt.datetime(2000, 1, 1), dt.datetime(2000, 1, 25))
+
+    objects = AModel.objects.filter(schedule__occurs_within=interval)
+
+    assert len(objects) == 1
+
+    assert objects[0] == expected_object
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures('django_postgresql_tempo')
 def test_null():
     """null=true option for the field works as expected."""
     NullableModel.objects.create()

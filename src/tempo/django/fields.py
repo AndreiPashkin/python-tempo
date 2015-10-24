@@ -38,7 +38,11 @@ class RecurrentEventSetField(with_metaclass(models.SubfieldBase,
         value = super(RecurrentEventSetField, self).get_prep_value(value)
         if value is None:
             return None
-        return json.dumps(value.to_json())
+
+        if isinstance(value, RecurrentEventSet):
+            value = value.to_json()
+
+        return json.dumps(value)
 
 
 class Contains(models.Lookup):
