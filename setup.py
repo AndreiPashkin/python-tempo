@@ -23,4 +23,13 @@ setup(
         'postgresql': read_requirements('postgresql-requirements.txt')
     },
     install_requires=read_requirements('requirements.txt'),
+    package_data= {
+        'tempo.postgresql': ['*.sql']
+    },
+    entry_points={
+        'console_scripts': [
+            'tempo-postgresql-install = tempo.postgresql.install:install',
+            'tempo-postgresql-uninstall = tempo.postgresql.uninstall:uninstall'
+        ]
+    }
 )
