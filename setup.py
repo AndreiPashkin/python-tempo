@@ -34,7 +34,7 @@ def read_requirements(filename):
 
 setup(
     name="python-tempo",
-    version="0.0.1a",
+    version="0.1.0dev0",
     author="Andrew Pashkin",
     author_email="andrew.pashkin@gmx.co.uk",
     license="BSD",
