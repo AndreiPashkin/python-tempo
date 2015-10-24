@@ -19,6 +19,9 @@ Django and Django REST Framework.
 
 Links
 =====
+:PyPI: https://pypi.python.org/pypi/python-tempo
+:Documentation: https://python-tempo.readthedocs.org/
+:Issues: https://github.com/AndrewPashkin/python-tempo/issues/
 :Code: https://github.com/AndrewPashkin/python-tempo/
 
 Features
@@ -72,7 +75,14 @@ Just a short example, which shows, how to construct and query a schedule.
    False
    >>> d = dt.datetime(year=2000, month=1, day=1)
    >>> list(islice(recurrenteventset.forward(start=d), 3))
-   [(datetime.datetime(2000, 1, 3, 10, 0), datetime.datetime(2000, 1, 3, 19, 0)), (datetime.datetime(2000, 1, 4, 10, 0), datetime.datetime(2000, 1, 4, 19, 0)), (datetime.datetime(2000, 1, 5, 10, 0), datetime.datetime(2000, 1, 5, 19, 0))]
+   [(datetime.datetime(2000, 1, 3, 10, 0),
+     datetime.datetime(2000, 1, 3, 19, 0)),
+    (datetime.datetime(2000, 1, 4, 10, 0),
+     datetime.datetime(2000, 1, 4, 19, 0)),
+    (datetime.datetime(2000, 1, 5, 10, 0),
+     datetime.datetime(2000, 1, 5, 19, 0))]
+
+.. _readme-schedule-model:
 
 Schedule model
 ==============

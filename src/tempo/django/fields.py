@@ -46,8 +46,10 @@ class RecurrentEventSetField(with_metaclass(models.SubfieldBase,
 
 
 class Contains(models.Lookup):
-    """Checks a single `datetime` object for containment in
-    RecurrentEventSet."""
+    """Provides `contains` lookup for :py:class:`.RecurrentEventSetField`.
+
+    Checks a single ``datetime`` object for containment in
+    :py:class:`.RecurrentEventSet`."""
     lookup_name = 'contains'
 
     def as_sql(self, compiler, connection):
@@ -64,7 +66,9 @@ RecurrentEventSetField.register_lookup(Contains)
 
 
 class Intersects(models.Lookup):
-    """Checks a given time interval in form of a pair-tuple of ``datetime``
+    """Provides `intersects` lookup for :py:class:`.RecurrentEventSetField`.
+
+    Checks a given time interval in form of a pair-tuple of ``datetime``
     objects, intersects with time defined by time interval set in
     given column."""
     lookup_name = 'intersects'
@@ -85,7 +89,9 @@ RecurrentEventSetField.register_lookup(Intersects)
 
 
 class OccursWithin(models.Lookup):
-    """Checks if some of continous events, defined in time interval set
+    """Provides `occurs_within` lookup for :py:class:`.RecurrentEventSetField`.
+
+    Checks if some of continous events, defined in time interval set
     is enclosed by dates in given pair-tuple of datetime objects."""
     lookup_name = 'occurs_within'
 
