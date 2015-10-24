@@ -127,3 +127,11 @@ Alternatives
 
 .. _python-dateutil: https://labix.org/python-dateutil
 .. _croniter: https://github.com/kiorky/croniter
+
+TODO
+====
+
+1. More tests for ``RecurrentEventSet``.
+2. Implement negative indexing for schedules - indexing from an end of a day
+   or month, etc. It will make library able to model schedules like
+   "last friday of the month".
