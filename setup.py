@@ -24,6 +24,10 @@ CLASSIFIERS = [
     'Topic :: Utilities',
 ]
 
+DESCRIPTION = ('Scheduling library, that provides a generic way to compose '
+               'and query schedules of recurrent continuous events, such as '
+               'working time of organizations, meetings, movie shows, etc.')
+
 
 def read_requirements(filename):
     """Returns requirements specs from file with given 'filename'
@@ -40,6 +44,8 @@ setup(
     license="BSD",
     url='https://github.com/AndrewPashkin/python-tempo/',
     classifiers=CLASSIFIERS,
+    description=DESCRIPTION,
+    long_description=open('README.rst').read(),
     packages=find_packages(where='src', include=['tempo', 'tempo.*']),
     package_dir={'': 'src'},
     extras_require={
