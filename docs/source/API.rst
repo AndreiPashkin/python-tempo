@@ -58,8 +58,6 @@ tempo.django.fields
 .. automodule:: tempo.django.fields
    :members:
 
-   .. autoattribute:: lookup_name
-
 Django-REST-Framework
 =====================
 

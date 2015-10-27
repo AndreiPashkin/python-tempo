@@ -323,3 +323,18 @@ class Omit(Directive):
 
 def setup(app):
     app.add_directive('omit', Omit)
+
+
+import sphinx.environment
+
+
+_old_warn_node = sphinx.environment.BuildEnvironment.warn_node
+
+def _warn_node(self, msg, node):
+    if msg.startswith('nonlocal image URI found:'):
+        return None
+    else:
+        _old_warn_node(self, msg, node)
+
+
+sphinx.environment.BuildEnvironment.warn_node = _warn_node
