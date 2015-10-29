@@ -77,8 +77,8 @@ We can change this behaviour, by passing additional argument `trim`::
 Now :py:meth:`.RecurrentEvent.forward` yielded largest possible interval not
 only in future direction for the `start`, but also in past direction.
 
-Composite schedules via `ReccurrentEvent` class
------------------------------------------------
+Composite schedules via `ReccurrentEventSet` class
+--------------------------------------------------
 
 Let's now take a look at :py:class:`.RecurrentEventSet`.
 It makes possible to compose simple schedules to more complex ones, using
