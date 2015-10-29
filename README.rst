@@ -10,9 +10,9 @@ Tempo
    :alt: Coverage
    :target: https://coveralls.io/github/AndrewPashkin/python-tempo?branch=master
 
-This project provides a generic way to compose and query schedules of
-recurrent continuous events, such as working time of organizations, meetings,
-movie shows, etc.
+This project is a scheduling library, written in Python, that provides a
+generic way to compose and query schedules of continuous recurrent events,
+such as working time of organizations, meetings, movie shows, etc.
 
 It contains a Python implementation and bindings for PostgreSQL,
 Django and Django REST Framework.

@@ -24,9 +24,10 @@ CLASSIFIERS = [
     'Topic :: Utilities',
 ]
 
-DESCRIPTION = ('Scheduling library, that provides a generic way to compose '
-               'and query schedules of recurrent continuous events, such as '
-               'working time of organizations, meetings, movie shows, etc.')
+DESCRIPTION = ('A Python scheduling library, that provides a generic way to '
+               'compose and query schedules of continuous recurrent events, '
+               'such as working time of organizations, meetings, movie shows, '
+               'etc.')
 
 
 def read_requirements(filename):
