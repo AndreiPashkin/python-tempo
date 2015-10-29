@@ -40,7 +40,7 @@ Then, we can perform queries - containment of a single date::
    >>> d3 in recurrentevent
    False
 
-We also can query for further occurences starting from certain point of time::
+We also can query for further occurrences starting from certain point of time::
 
    >>> from itertools import islice
    >>> start = dt.datetime(2000, 1, 4)
@@ -56,15 +56,15 @@ We also can query for further occurences starting from certain point of time::
 
 :py:meth:`.RecurrentEvent.forward` returns a generator,
 that yields as largest possible interval each time. In this case it's a time
-span between a monday and a saturday (non-inclusive) of each week.
+span between a Monday and a Saturday (non-inclusive) of each week.
 
 Notice - `start` defines Tuesday, but our schedule starts on Monday - and
 :py:meth:`~.RecurrentEvent.forward`, yielded the first
 time interval, that starts on Tuesday, the time, that equals our `start`
 argument.
-It shrinked the first time interval by the `start`, since otherwise
+It shrunk the first time interval by the `start`, since otherwise
 the first time interval would be started from the time earlier, than `start`.
-We can change this behaviour, by passing additional argument `trim`::
+We can change this behavior, by passing additional argument `trim`::
 
    >>> list(islice(recurrentevent.forward(start, trim=False), 3))
    [(datetime.datetime(2000, 1, 3, 0, 0),
@@ -113,11 +113,11 @@ the same meaning as :py:class:`.RecurrentEvent` ones has.
 PostgreSQL
 ==========
 
-The library provides domain types and functions, that represents lirary's
+The library provides domain types and functions, that represents library's
 classes and their methods, which has similar to Python's methods signatures.
 
 .. note::
-   They are actually bindings to Python library, not imlementations from
+   They are actually bindings to Python library, not implementations from
    scratch, that's why user required to have Python library installed and
    available for import from PL/Python procedures.
 
@@ -203,7 +203,7 @@ Django-REST-Framework
 Django REST Framework binding provides a `custom serializer field`_ -
 :py:class:`.serializers.RecurrentEventSetField`. It's very simple and adds no
 additional parameters. Just refer to DRF `serializers documentation`_ and use
-this field like any other serialzier field.
+this field like any other serializer field.
 
 .. _`custom serializer field`: http://www.django-rest-framework.org/api-guide/fields/#custom-fields
 .. _`serializers documentation`: http://www.django-rest-framework.org/tutorial/1-serialization/#creating-a-serializer-class

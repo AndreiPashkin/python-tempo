@@ -21,14 +21,14 @@ PostgreSQL
 .. describe:: tempo_recurrentevent
 
    :TYPE: domain type
-   :BASE: jsonb
+   :BASE: `jsonb`
 
    A domain type, that represents :py:class:`.RecurrentEvent`.
 
 .. describe:: tempo_recurrenteventset
 
    :TYPE: domain type
-   :BASE: jsonb
+   :BASE: `jsonb`
 
    A domain type, that represents :py:class:`.RecurrentEventSet`.
 
@@ -37,7 +37,7 @@ PostgreSQL
    :TYPE: function
    :RETURNS: boolean
    :VOLATILITY: IMMUTABLE
-   :LANGUAGE: plpythonu
+   :LANGUAGE: `plpythonu`
 
    Checks `datetime` for containment in `recurrenteventset`.
 
@@ -46,7 +46,7 @@ PostgreSQL
    :TYPE: function
    :RETURNS: TABLE(start timestamp, stop timestamp)
    :VOLATILITY: IMMUTABLE
-   :LANGUAGE: plpythonu
+   :LANGUAGE: `plpythonu`
 
    Future intervals of `recurrenteventset` as set of rows.
 

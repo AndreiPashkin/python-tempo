@@ -32,7 +32,7 @@ from distutils.version import LooseVersion
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinxcontrib.spelling'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -295,6 +295,10 @@ texinfo_documents = [
 
 
 doctest_test_doctest_blocks = 'yes'
+
+
+spelling_show_suggestions = True
+spelling_word_list_filename = 'words.txt'
 
 
 # To make Django-related modules importable. Otherwise they raise an exception.

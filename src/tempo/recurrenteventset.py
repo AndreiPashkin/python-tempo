@@ -238,7 +238,7 @@ class RecurrentEventSet(object):
         """Generates intervals according to the expression.
 
         Intervals never overlap.
-        Each next interval is largest possbile interval.
+        Each next interval is largest possible interval.
 
         Parameters
         ----------
@@ -246,7 +246,7 @@ class RecurrentEventSet(object):
             Inclusive start date.
         trim : bool
             If `True` (which is default), the starting point of a first
-            interval will always be equal to or greater than'start'.
+            interval will always be equal to or greater than 'start'.
             Otherwise it will be equal to the point, where the interval
             actually starts, which may be placed earlier in time, that
             'start'.
@@ -259,7 +259,7 @@ class RecurrentEventSet(object):
 
         Notes
         -----
-        The alghorithm is simple:
+        The algorithm is simple:
 
             1. It generates intervals from RecurrentEvent instances and
                applies set logic operators on them.
@@ -270,7 +270,7 @@ class RecurrentEventSet(object):
             4. If checks succeed, yields interval previous to gap.
             5. If not - iterates generators until check succeed.
 
-        This implementation if fairly ineffective and should be otimized.
+        This implementation if fairly ineffective and should be optimized.
         """
         context = {
             'all': []

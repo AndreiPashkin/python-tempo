@@ -26,16 +26,16 @@ Links
 
 Features
 ========
-- Flexible schedule model, that can express shcedules, that other libraries
+- Flexible schedule model, that can express schedules, that other libraries
   can't.
-- Queries: containment of a single timestamp, future occurences.
+- Queries: containment of a single timestamp, future occurrences.
 - Bindings:
 
   * PostgreSQL
 
     + Domain type for storing schedules
     + Procedures for performing tests on them
-      (timestamp containment, future occurences).
+      (timestamp containment, future occurrences).
 
   * Django
 
@@ -96,8 +96,8 @@ Here is an example of how Tempo represents schedules::
             ('AND', [1, 5, 'day', 'week'], [10, 19, 'hour', 'day']),
             ('AND', [5, 6, 'day', 'week'], [10, 16, 'hour', 'day'])))
 
-It means "from monday to thursday between 10am and 7pm and
-in friday between 10am and 4pm".
+It means "from Monday to Thursday between 10am and 7pm and
+in Friday between 10am and 4pm".
 
 Informal definition
 -------------------
@@ -134,4 +134,4 @@ TODO
 1. More tests for ``RecurrentEventSet``.
 2. Implement negative indexing for schedules - indexing from an end of a day
    or month, etc. It will make library able to model schedules like
-   "last friday of the month".
+   "last Friday of the month".

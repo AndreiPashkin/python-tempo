@@ -91,7 +91,7 @@ RecurrentEventSetField.register_lookup(Intersects)
 class OccursWithin(models.Lookup):
     """Provides `occurs_within` lookup for :py:class:`.RecurrentEventSetField`.
 
-    Checks if some of continous events, defined in time interval set
+    Checks if some of continuous events, defined in time interval set
     is enclosed by dates in given pair-tuple of datetime objects."""
     lookup_name = 'occurs_within'
 
