@@ -33,4 +33,4 @@ Perform steps for PostgreSQL.
 
 Django-REST-Framework
 =====================
-Perform steps for Python or PostgreSQL. Perform steps for PostgreSQL.
+Perform steps for Python or PostgreSQL.
