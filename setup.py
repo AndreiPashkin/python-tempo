@@ -47,6 +47,7 @@ setup(
     classifiers=CLASSIFIERS,
     description=DESCRIPTION,
     long_description=open('README.rst').read(),
+    keywords="schedule recurrent events",
     packages=find_packages(where='src', include=['tempo', 'tempo.*']),
     package_dir={'': 'src'},
     extras_require={
