@@ -52,27 +52,42 @@ Features
 
 Quick example
 =============
-Just a short example, which shows, how to construct and query a schedule.
-::
+Just a short example, that shows base capabilities of the library.
+
+Let's create a schedule, that means `10:00 - 19:00 from Monday to Thursday and
+10:00 - 16:00 in Friday`::
 
    >>> import datetime as dt
-   >>> from itertools import islice
    >>> from tempo.recurrenteventset import RecurrentEventSet
    >>> recurrenteventset = RecurrentEventSet.from_json(
    ...     ('OR',
    ...         ('AND', [1, 5, 'day', 'week'], [10, 19, 'hour', 'day']),
    ...         ('AND', [5, 6, 'day', 'week'], [10, 16, 'hour', 'day']))
-   ... )  # 10-19 from Monday to Thursday and 10-16 in Friday
+   ... )
+
+Then, test if `Thursday 18:00` is included in the schedule::
+
    >>> d1 = dt.datetime(year=2000, month=10, day=5, hour=18)
    >>> d1.weekday()  # Thursday
    3
    >>> d1 in recurrenteventset
    True
+
+Then, do the same thing, but for `Friday 18:00`::
+
    >>> d2 = dt.datetime(year=2000, month=10, day=6, hour=18)
    >>> d2.weekday()  # Friday
    4
    >>> d2 in recurrenteventset
    False
+
+It's not included. Because our schedule includes only time
+from 10:00 to 16:00 in Fridays.
+
+We also can query for future time intervals, defined by the schedule,
+starting from certain point of time::
+
+   >>> from itertools import islice
    >>> d = dt.datetime(year=2000, month=1, day=1)
    >>> list(islice(recurrenteventset.forward(start=d), 3))
    [(datetime.datetime(2000, 1, 3, 10, 0),
