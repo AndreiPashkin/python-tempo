@@ -1,7 +1,7 @@
 # coding=utf-8
 """Provides SparseInterval class."""
 import operator as op
-from itertools import chain, islice, combinations
+from itertools import combinations
 from collections import deque
 
 from six.moves import range  # pylint: disable=redefined-builtin
@@ -106,22 +106,27 @@ class SparseInterval(object):
         if len(self._intervals) == 0:
             return SparseInterval(*self._intervals)
 
-        first = None
-        last = None
-        slice_ = [None, None]
-        if start is not None and intervals[0][0] < start:
-            first = (start, intervals[0][1])
-            slice_[0] = 1
+        if start is not None:
+            for i, (a, b) in enumerate(intervals, 1):
+                if a < start < b:
+                    del intervals[:i]
+                    intervals.insert(0, (start, b))
+                    break
+                elif start <= a:
+                    del intervals[:i - 1]
+                    break
 
-        if stop is not None and intervals[-1][1] > stop:
-            last = (intervals[-1][0], stop)
-            slice_[1] = len(intervals) - 1
+        if stop is not None:
+            for i, (a, b) in enumerate(reversed(intervals), 1):
+                if a < stop < b:
+                    intervals = intervals[:-i]
+                    intervals.append((a, stop))
+                    break
+                elif stop >= b:
+                    intervals = intervals[:-i + 1]
+                    break
 
-        return SparseInterval(
-            *chain((first,) if first is not None else (),
-                   islice(intervals, *slice_),
-                   (last,) if last is not None else ())
-        )
+        return SparseInterval(*intervals)
 
     def __eq__(self, other):
         try:
