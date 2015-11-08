@@ -123,7 +123,7 @@ def py_contains(item, expression):
 def recurrenteventset_contains(request):
     if request.param == Implementation.PYTHON:
         return py_contains
-    elif request.param == Implementation.POSTGRESQL:
+    elif request.param == Implementation.POSTGRESQL.args[0]:
         connection = request.getfuncargvalue('connection')
         request.getfuncargvalue('postgresql_tempo')
         request.getfuncargvalue('transaction')
@@ -217,7 +217,7 @@ def recurrenteventset_forward(request):
     """Various APIs for RecurrentEventSet.forwars()."""
     if request.param == Implementation.PYTHON:
         return py_forward
-    elif request.param == Implementation.POSTGRESQL:
+    elif request.param == Implementation.POSTGRESQL.args[0]:
         connection = request.getfuncargvalue('connection')
         request.getfuncargvalue('postgresql_tempo')
         request.getfuncargvalue('transaction')

@@ -45,11 +45,11 @@ ROOT_URLCONF = 'conf.urls'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['TEMPO_DB_NAME'],
-        'USER': os.environ['TEMPO_DB_USER'],
-        'PASSWORD': os.environ['TEMPO_DB_PASSWORD'],
-        'HOST': os.environ['TEMPO_DB_HOST'],
-        'PORT': os.environ['TEMPO_DB_PORT']
+        'NAME': os.getenv('TEMPO_DB_NAME'),
+        'USER': os.getenv('TEMPO_DB_USER'),
+        'PASSWORD': os.getenv('TEMPO_DB_PASSWORD'),
+        'HOST': os.getenv('TEMPO_DB_HOST'),
+        'PORT': os.getenv('TEMPO_DB_PORT')
     }
 }
 
