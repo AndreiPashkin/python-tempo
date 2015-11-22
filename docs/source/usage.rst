@@ -126,6 +126,9 @@ Currently only methods for :py:class:`.RecurrentEventSet` are supported.
 Django
 ======
 
+Querying
+--------
+
 .. omit::
 
    >>> getfixture('db')
@@ -196,6 +199,37 @@ from `2015-01-01 10:00` to `2015-01-01 19:00`::
 
 
 .. _`Django model field`: https://docs.djangoproject.com/en/1.8/topics/db/models/#fields
+
+Using Django-Admin widget
+-------------------------
+
+Here is a minimal example::
+
+    from django.contrib import admin
+    from django import forms
+
+    from myapp.models import Movie
+
+    from tempo.django.forms import RecurrentEventSetField
+
+
+    class MovieAdminForm(forms.ModelForm):
+        schedule = RecurrentEventSetField()
+
+        class Meta:
+            model = Movie
+            fields = ['name', schedule']
+
+
+    class MovieAdmin(admin.ModelAdmin):
+        form = MovieAdminForm
+
+    admin.site.register(Movie, MyModelAdmin)
+
+It will look like this:
+
+.. image:: widget.png
+
 
 
 Django-REST-Framework

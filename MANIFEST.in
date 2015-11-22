@@ -3,3 +3,4 @@ include README.rst
 include LICENSE
 include requirements.txt
 include postgresql-requirements.txt
+recursive-include src/tempo/django/static/tempo *.js *.css

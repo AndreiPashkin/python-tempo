@@ -40,6 +40,7 @@ Features
   * Django
 
     + Model field
+    + Django-Admin widget
     + Custom lookups
       (timestamp containment,
       intersection with interval between two timestamps,
