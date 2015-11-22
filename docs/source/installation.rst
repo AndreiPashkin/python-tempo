@@ -20,12 +20,14 @@ PostgreSQL
    PostgreSQL instance (see details `here
    <http://www.postgresql.org/docs/9.4/static/plpython.html>`_).
 
-3) After installing Python egg, two commands will become available to you:
-   ``tempo-postgresql-install`` and ``tempo-postgresql-uninstall``.
-   They are output to stdout installation and uninstallation SQL scripts
+3) After installing Python egg, you will be able to execute such commands:
+   ``python -m tempo.postgresql.install`` and
+   ``python -m tempo.postgresql.uninstall``.
+   They will output to stdout installation and uninstallation SQL scripts
    respectively. Feed them to ``psql``, to perform needed operation. On Unix it
-   can look like this:
-   ``tempo-postgresql-install | sudo -u postgres psql -d my_databse``.
+   can look like this::
+
+       python -m tempo.postgresql.install | sudo -u postgres psql -d my_databse
 
 Django
 ======
