@@ -382,7 +382,7 @@ class RecurrentEventSet(object):
     def from_json(cls, value):
         """Constructs `RecurrentEventSet` instance from JSON serializable
         representation or from JSON string."""
-        if not isinstance(value, (tuple, list)):
+        if isinstance(value, string_types):
             value = json.loads(value)
         return cls(_walk(value, cls.from_json_callback).value)
 
