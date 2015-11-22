@@ -1,0 +1,48 @@
+.tempo-recurrenteventset {
+    display: table;
+}
+
+.tempo-recurrenteventset-operator {
+    display: table-cell;
+    vertical-align: middle;
+    width: 30px;
+    background-color: #C8D8E9;
+    padding: 10px 5px;
+}
+
+.tempo-controls {
+    display: table;
+    width: 100%;
+    border-bottom: solid #D2D2D2 1px;
+    clear: both;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+.tempo-controls:before { content: '\A'; }
+.tempo-controls:after { content: '\A'; }
+
+.tempo-recurrenteventset-controls {
+    display: inline-block;
+}
+
+.tempo-recurrentevent-from, .tempo-recurrentevent-to {
+    width: 30px;
+    display: inline;
+}
+
+.tempo-recurrenteventset-remove, .tempo-recurrentevent-remove {
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.tempo-recurrenteventset-add, .tempo-recurrenteventset-addset {
+    display: table-cell;
+    font-size: 10px;
+    padding: 10px;
+}
+
+.tempo-recurrenteventset-operands {
+    padding-left: 10px;
+    display: table;
+    /*float: left;*/
+}

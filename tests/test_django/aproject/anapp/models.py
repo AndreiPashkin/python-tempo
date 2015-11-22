@@ -5,6 +5,9 @@ from tempo.django.fields import RecurrentEventSetField
 class AModel(models.Model):
     schedule = RecurrentEventSetField("Schedule")
 
+    class Meta:
+        app_label = 'anapp'
+
 
 class NullableModel(models.Model):
     schedule = RecurrentEventSetField("Schedule", null=True, blank=True)

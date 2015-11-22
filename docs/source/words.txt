@@ -12,3 +12,5 @@ timestamp
 stdout
 Indices
 uninstallation
+Admin
+admin
