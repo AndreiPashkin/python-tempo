@@ -4,7 +4,7 @@ import itertools as it
 from collections import deque
 import json
 
-from six import string_types
+from six import string_types, integer_types
 from six.moves import reduce  # pylint: disable=redefined-builtin
 
 from tempo.recurrentevent import RecurrentEvent
@@ -389,6 +389,7 @@ class RecurrentEventSet(object):
     @staticmethod
     def validate_json(expression):
         """Validates JSON expression."""
+        # pylint: disable=too-many-branches
         if isinstance(expression, string_types):
             try:
                 expression = json.loads(expression)
@@ -410,23 +411,30 @@ class RecurrentEventSet(object):
                 if len(e) < 2:
                     return False
 
-                if e[0] in _OPS:
-                    queued.appendleft(e)
-                    continue
-                elif len(e) != 4:
+                try:
+                    if e[0].upper() in _OPS:
+                        queued.appendleft(e)
+                        continue
+                except AttributeError:
+                    pass
+
+                if len(e) != 4:
                     return False
 
-                if not all(n >= 0 for n in e[:2]):
+                if not all(isinstance(n, integer_types) and n >= 0
+                           for n in e[:2]):
                     return False
 
                 unit = e[2]
 
-                if unit not in _UNITS:
+                if not hasattr(unit, 'lower') or unit.lower() not in _UNITS:
                     return False
 
                 recurrence = e[3]
 
-                if recurrence not in _UNITS and recurrence is not None:
+                if (not hasattr(recurrence, 'lower') or
+                    recurrence.lower() not in _UNITS and
+                    recurrence is not None):
                     return False
 
         return True

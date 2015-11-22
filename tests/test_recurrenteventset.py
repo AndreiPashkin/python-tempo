@@ -271,6 +271,11 @@ def test_forward(expression, start, trim, expected, recurrenteventset_forward):
     ([AND, [1, 5, "month", "year"], [NOT, [1, 15, "day", "month"]]], True),
     ([AND, [1, 2, "months", "year"]], False),
     ('["AND", [1, 2, "month", "year"]]', True),
+    ([AND, ['one', 2, "month", "year"]], False),
+    ([AND, [1, 'two', "month", "year"]], False),
+    (['and', [1, 2, "month", "year"]], True),
+    ([AND, [1, 2, 12, "year"]], False),
+    ([AND, [1, 2, "month", 100]], False),
 ])
 def test_validate_json(expression, expected):
     """Cases for RecurrentEventSet.validate_json()."""
