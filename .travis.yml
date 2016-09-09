@@ -6,8 +6,9 @@ sudo: required
 language: python
 install:
   - sudo apt-get -qq update
-  - sudo apt-get -qq install make libenchant1c2a
+  - sudo apt-get -qq install make libenchant1c2a postgresql-contrib-9.4
   - psql -U postgres -c "ALTER ROLE postgres PASSWORD '$TEMPO_DB_PASSWORD';"
+  - sudo service postgresql restart
   - sudo pip install -U pip
   - sudo pip install .[postgresql]
   - pip install tox==2.1.1 coveralls
